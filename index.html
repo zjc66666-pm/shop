@@ -423,7 +423,7 @@
     }
 
     function summary() {
-      return `<aside class="summary"><h2>Order Summary</h2><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span><strong>-$10.00</strong></div><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><button class="primary" onclick="setView('checkout')">CHECK OUT</button></aside>`;
+      return `<aside class="summary"><h2>Order Summary</h2><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span></div><div class="checkout-discount-code"><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><strong>-$10.00</strong></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><button class="primary" onclick="setView('checkout')">CHECK OUT</button></aside>`;
     }
 
     function cartPage() {
