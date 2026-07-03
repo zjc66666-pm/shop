@@ -206,7 +206,8 @@
     .order-price { display: flex; align-items: baseline; gap: 6px; color: #333333; font-weight: 700; white-space: nowrap; justify-self: end; }
     .order-price .current-price { color: #333333; font-weight: 700; }
     .order-price s { color: #888888; font-weight: 400; }
-    .summary-bundle { margin-top: 18px; padding: 14px 0 0; border-top: 1px solid #e5e7eb; }
+    .summary-bundle { margin-top: 18px; padding: 14px 0 0; border-top: 0; }
+    .summary-bundle + .summary-bundle { border-top: 1px solid #e5e7eb; }
     .summary-bundle-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
     .summary-bundle-title { display: flex; flex: 1 1 auto; align-items: flex-start; gap: 8px; min-width: 0; color: #222222; font-size: 14px; font-weight: 600; line-height: 1.35; }
     .summary-bundle-title-text { display: -webkit-box; min-width: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }
@@ -226,7 +227,7 @@
     .checkout-discount-code strong { flex: 0 0 auto; color: #333333; font-weight: 500; text-align: right; }
     .summary-savings { display: flex; align-items: center; gap: 4px; color: #111111; font-size: 13px; font-weight: 800; }
     .discount-row { display: flex; align-items: center; gap: 10px; margin: 18px 0; }
-    .discount-row .field { flex: 1 1 auto; margin-bottom: 0; }
+    .discount-row .field { flex: 1 1 auto; margin-bottom: 0; border-radius: 8px; }
     .discount-row button { flex: 0 0 170px; justify-content: center; color: #555555; cursor: pointer; }
 
     @media (max-width: 900px) {
@@ -235,6 +236,7 @@
       .checkout * { min-width: 0; }
       .checkout-left::before, .checkout-right::after { display: none; }
       .mobile-summary { display: flex; }
+      .mobile-summary { border-bottom: 0 !important; box-shadow: none; }
       .checkout.mobile-summary-collapsed .checkout-summary-content { display: none; }
       .checkout.mobile-summary-open .checkout-summary-content { display: block; }
       .checkout-right { order: -1; width: 100%; max-width: 100%; overflow-x: hidden; padding: 0 16px 14px; border-bottom: 1px solid #e5e5e5; }
