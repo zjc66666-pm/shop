@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neurix Transaction Prototype</title>
+  <style>
+    :root { --ink:#111; --text:#333; --muted:#6b7280; --faint:#9ca3af; --line:#e5e7eb; --soft:#f6f6f6; --panel:#fff; --blue:#4096ff; --tag:#fff4e6; --tagText:#fa8c16; font-family:"TT Norms Pro",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#f6f6f6; color:var(--text); font-size:14px; line-height:1.35; }
+    button, input { font:inherit; }
+    .hidden { display:none !important; }
+    .nav { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:24px; min-height:72px; padding:0 40px; border-bottom:1px solid var(--line); background:#fff; }
+    .brand { border:0; background:transparent; color:var(--ink); cursor:pointer; font-size:18px; font-weight:800; text-align:left; }
+    .tabs { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+    .tabs button { height:38px; border:1px solid #d8d8d8; border-radius:6px; padding:0 14px; background:#fff; color:#111; cursor:pointer; font-size:13px; font-weight:700; }
+    .tabs button.active, .tabs button:hover { border-color:#111; background:#111; color:#fff; }
+    .entry { max-width:1080px; margin:0 auto; padding:72px 40px; }
+    .entry-label { margin:0 0 12px; color:#555; font-size:12px; font-weight:900; }
+    .entry h1 { max-width:720px; margin:0 0 16px; color:#111; font-size:46px; line-height:1.05; letter-spacing:0; }
+    .entry p { max-width:680px; margin:0 0 36px; color:#555; font-size:16px; line-height:1.65; }
+    .entry-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+    .entry-card { min-height:180px; border:1px solid #e2e2e2; border-radius:8px; padding:22px; background:#fff; color:#111; cursor:pointer; text-align:left; transition:border-color .16s, box-shadow .16s, transform .16s; }
+    .entry-card:hover { border-color:#111; box-shadow:0 12px 34px rgba(0,0,0,.08); transform:translateY(-2px); }
+    .entry-card strong { display:block; margin-bottom:12px; font-size:20px; }
+    .entry-card span { display:block; color:#555; font-size:14px; line-height:1.55; }
+    .page { background:#fff; min-height:calc(100vh - 72px); padding-bottom:48px; }
+    .wrap { width:100%; max-width:1328px; margin:0 auto; padding:0 32px 50px; }
+    .crumb { height:58px; color:#9b9b9b; line-height:58px; }
+    .title { margin:20px 0 24px; color:#222; font-size:32px; line-height:1.2; text-align:center; }
+    .cart-layout { display:grid; grid-template-columns:minmax(0,1fr) 360px; align-items:start; gap:24px; }
+    .list { display:grid; gap:16px; }
+    .card, .summary { border:1px solid #efefef; border-radius:8px; background:#fff; padding:16px; }
+    .product-card { display:grid; grid-template-columns:100px minmax(0,1fr); gap:16px; }
+    .thumb { display:flex; align-items:center; justify-content:center; flex:0 0 auto; border-radius:8px; background:#e5e5e5; color:#999; font-size:12px; }
+    .thumb.large { width:100px; height:100px; }
+    .thumb.small { width:60px; height:60px; border-radius:6px; }
+    .main { min-width:0; }
+    .top, .bundle-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+    .product-title, .bundle-title { display:-webkit-box; min-width:0; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:1; color:#222; font-size:16px; font-weight:600; line-clamp:1; text-overflow:ellipsis; }
+    .price { display:flex; flex:0 0 auto; align-items:baseline; gap:8px; color:#222; font-size:18px; font-weight:800; white-space:nowrap; }
+    .price s { color:#999; font-size:15px; font-weight:700; }
+    .select-grid { display:grid; grid-template-columns:repeat(2,minmax(0,180px)); gap:10px; margin:10px 0 12px; }
+    .select-grid.compact { grid-template-columns:repeat(2,minmax(0,140px)); margin:8px 0 0; }
+    .select { position:relative; min-width:0; }
+    .select-trigger { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; height:34px; border:1px solid #d9d9d9; border-radius:6px; padding:0 10px 0 12px; background:#fff; color:#222; cursor:pointer; font-size:13px; text-align:left; outline:none; transition:border-color .16s, box-shadow .16s; }
+    .select-trigger:hover { border-color:#bdbdbd; }
+    .select.open .select-trigger, .select-trigger:focus-visible { border-color:var(--blue); box-shadow:0 0 0 2px rgba(5,145,255,.1); }
+    .select-trigger span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .chev { flex:0 0 auto; width:7px; height:7px; margin-top:-3px; border-right:1px solid #9ca3af; border-bottom:1px solid #9ca3af; transform:rotate(45deg); }
+    .menu { position:absolute; top:calc(100% + 4px); left:0; z-index:60; width:100%; overflow:hidden; border:1px solid #d9d9d9; border-radius:6px; background:#fff; box-shadow:0 8px 22px rgba(0,0,0,.08); }
+    .menu button { display:block; width:100%; height:34px; border:0; padding:0 12px; background:#fff; color:#333; cursor:pointer; font-size:13px; text-align:left; }
+    .menu button:hover { background:#f5f9ff; }
+    .menu button.selected { background:#e6f4ff; color:#111; font-weight:600; }
+    .variant { margin:10px 0 12px; color:#888; font-size:13px; }
+    .variant.compact { margin:6px 0 0; }
+    .discount-tag { display:inline-flex; align-items:center; gap:4px; max-width:100%; margin-top:4px; color:#6b7280; font-size:12px; font-weight:500; line-height:1.25; }
+    .tag-icon { width:13px; height:13px; color:#9ca3af; }
+    .actions { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:14px; }
+    .qty-row { display:inline-flex; align-items:center; gap:8px; color:#666; font-size:12px; }
+    .qty { display:inline-flex; align-items:center; height:32px; overflow:hidden; border:1px solid #e5e5e5; border-radius:999px; background:#fff; }
+    .qty button { width:32px; height:100%; border:0; background:#fff; color:#222; cursor:pointer; font-size:14px; }
+    .qty strong { display:inline-flex; align-items:center; justify-content:center; width:42px; height:18px; border-right:1px solid #d8d8d8; border-left:1px solid #d8d8d8; color:#555; font-size:13px; font-weight:500; }
+    .remove { border:0; padding:0; background:transparent; color:#8a8a8a; cursor:pointer; font-size:13px; font-weight:400; line-height:34px; text-decoration:none; text-underline-offset:2px; }
+    .remove:hover { color:#555; text-decoration:underline; text-decoration-color:#999; }
+    .bundle-title { display:flex; align-items:center; gap:8px; }
+    .bundle-tag { flex:0 0 auto; border-radius:4px; padding:4px 8px; background:#111; color:#fff; font-size:11px; font-weight:800; }
+    .bundle-children { position:relative; display:grid; gap:12px; margin-top:16px; border-top:1px solid #f5f5f5; padding-top:16px; padding-bottom:8px; }
+    .bundle-child { display:grid; grid-template-columns:60px minmax(0,1fr); gap:12px; align-items:center; }
+    .bundle-child-title { display:flex; align-items:center; gap:8px; color:#222; font-size:13px; font-weight:400; }
+    .included { display:inline-flex; align-items:center; flex:0 0 auto; height:18px; border-radius:4px; padding:0 8px; background:#fff4e6; color:#fa8c16; font-size:10px; font-weight:800; line-height:18px; }
+    .bundle-remove { position:absolute; right:0; bottom:0; line-height:18px; }
+    .summary { position:sticky; top:96px; display:grid; gap:14px; }
+    .summary h2 { margin:0 0 6px; font-size:22px; }
+    .summary-row { display:flex; justify-content:space-between; gap:16px; color:#555; }
+    .summary-total { border-top:1px solid #eee; padding-top:14px; color:#111; }
+    .summary-total strong { font-size:24px; }
+    .primary { height:44px; border:0; border-radius:8px; background:#111; color:#fff; cursor:pointer; font-weight:900; }
+    .drawer-mask { position:fixed; inset:0; z-index:90; display:none; border:0; background:rgba(0,0,0,.5); }
+    .drawer-mask.show { display:block; }
+    .drawer { position:fixed; top:0; right:0; z-index:100; display:flex; flex-direction:column; width:550px; max-width:90vw; height:100vh; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,.15); transform:translateX(100%); transition:transform .25s ease; }
+    .drawer.show { transform:translateX(0); }
+    .drawer-head { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid #eaeaea; }
+    .drawer-head h2 { margin:0; color:#222; font-size:20px; }
+    .close { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border:0; border-radius:999px; background:#ededed; cursor:pointer; }
+    .drawer-body { flex:1 1 auto; overflow:auto; padding:24px; }
+    .drawer-list { display:grid; gap:16px; }
+    .drawer-card { border:1px solid #efefef; border-radius:8px; padding:16px; background:#fff; }
+    .drawer-product { display:grid; grid-template-columns:100px minmax(0,1fr); gap:16px; }
+    .drawer-title { display:-webkit-box; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; color:#222; font-size:16px; font-weight:600; line-clamp:2; }
+    .drawer-meta { margin-top:8px; }
+    .drawer-footer { flex:0 0 auto; border-top:1px solid #eaeaea; padding:20px 24px 20px; background:#fff; }
+    .drawer-footer .summary-row { margin-bottom:8px; color:#222; }
+    .drawer-footer .total strong { font-size:22px; }
+    .drawer .bundle-card { border:1px solid #efefef; border-radius:8px; padding:14px 16px 16px; }
+    .drawer .bundle-head { margin-bottom:12px; }
+    .drawer .bundle-children { padding-top:10px; padding-bottom:0; }
+    .drawer .bundle-remove { position:static; justify-self:end; margin-top:8px; line-height:18px; }
+    .checkout { display:grid; grid-template-columns:minmax(0,1fr) 440px; max-width:1024px; min-height:100vh; margin:0 auto; background:#fff; }
+    .checkout-left { padding:40px 20px 48px; }
+    .checkout-form { max-width:620px; margin:0 auto; }
+    .checkout-right { background:#f9fafb; padding:40px 16px; }
+    .mobile-summary { display:none; align-items:center; justify-content:space-between; min-height:28px; border-bottom:1px solid #e5e5e5; padding:16px 16px 14px; background:#f9fafb; color:#111; font-weight:800; }
+    .express-title { margin-bottom:12px; color:#707070; text-align:center; }
+    .wallet { display:grid; gap:10px; margin-bottom:18px; }
+    .wallet-main { height:46px; border:0; border-radius:8px; background:#ffc439; color:#003087; cursor:pointer; font-size:18px; font-weight:800; }
+    .wallet-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .wallet-row button { height:46px; border:0; border-radius:8px; background:#000; color:#fff; cursor:pointer; font-size:18px; font-weight:800; }
+    .or { display:flex; align-items:center; gap:14px; margin:16px 0; color:#b2b2b2; }
+    .or:before, .or:after { content:""; flex:1; height:1px; background:#ddd; }
+    .section { margin-bottom:24px; }
+    .section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .section h3 { margin:0 0 12px; color:#111; font-size:20px; }
+    .field { display:flex; align-items:center; gap:10px; height:44px; border:1px solid #cfd2d6; border-radius:4px; background:#fff; color:#b4b8bf; padding:0 16px; margin-bottom:12px; }
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .ship, .pay-card { overflow:hidden; border:1px solid #d7d7da; border-radius:8px; }
+    .ship-rate { display:flex; align-items:center; gap:14px; min-height:54px; padding:0 16px; border-bottom:1px solid #e8e8eb; }
+    .ship-rate:last-child { border-bottom:0; }
+    .ship-rate.active { margin:-1px; border:1px solid #222; background:#f4f5f6; }
+    .dot { width:20px; height:20px; border:2px solid #d0d0d0; border-radius:50%; }
+    .active .dot { border-color:#222; background:radial-gradient(circle,#fff 0 4px,#222 5px); }
+    .ship-rate b { margin-left:auto; }
+    .pay-head { display:flex; align-items:center; gap:12px; padding:16px; border-bottom:1px solid #eee; }
+    .card-form { padding:16px; }
+    .pay-now { width:100%; height:52px; border:0; border-radius:6px; background:#111; color:#fff; cursor:pointer; font-size:16px; font-weight:900; }
+    .order-item { display:grid; grid-template-columns:100px minmax(0,1fr) auto; gap:16px; align-items:start; padding:16px 0; border-bottom:1px solid #e5e7eb; }
+    .order-img { position:relative; width:100px; height:100px; border-radius:8px; background:#e5e5e5; display:grid; place-items:center; color:#999; }
+    .qty-badge { position:absolute; top:-8px; right:-8px; display:grid; place-items:center; width:20px; height:20px; border-radius:50%; background:#111; color:#fff; font-size:12px; font-weight:700; }
+    .order-title { display:-webkit-box; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; color:#333; font-size:14px; font-weight:500; line-height:1.35; }
+    .order-variant { margin-top:4px; color:#6b7280; font-size:13px; }
+    .order-price { color:#333; font-weight:700; white-space:nowrap; }
+    .summary-bundle { padding:14px 0 0; border-top:1px solid #e5e7eb; }
+    .summary-bundle-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .summary-bundle-title { display:flex; align-items:flex-start; gap:8px; min-width:0; color:#222; font-size:14px; font-weight:600; line-height:1.35; }
+    .summary-bundle-right { flex:0 0 auto; text-align:right; }
+    .bundle-products { display:grid; gap:12px; padding:10px 0 4px; }
+    .bundle-product-row { display:grid; grid-template-columns:70px minmax(0,1fr); gap:16px; align-items:start; }
+    .bundle-product-title { display:flex; align-items:center; min-height:18px; gap:6px; }
+    .bundle-product-title .name { display:-webkit-box; min-height:18px; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; color:#333; font-size:14px; line-height:18px; transform:translateY(1px); }
+    .checkout-summary { display:grid; gap:12px; margin-top:18px; }
+    .summary-savings { display:flex; align-items:center; gap:4px; color:#111; font-size:13px; font-weight:800; }
+    @media (max-width:820px) {
+      .nav { min-height:auto; padding:16px 18px; align-items:flex-start; flex-direction:column; }
+      .tabs { justify-content:flex-start; }
+      .entry, .wrap { padding:44px 18px; }
+      .entry h1 { font-size:34px; }
+      .entry-grid, .cart-layout { grid-template-columns:1fr; }
+      .product-card { grid-template-columns:90px minmax(0,1fr); gap:12px; }
+      .thumb.large { width:90px; height:90px; }
+      .top { gap:10px; }
+      .product-title, .bundle-title { font-size:14px; -webkit-line-clamp:2; line-clamp:2; }
+      .price { font-size:16px; }
+      .price s { font-size:13px; }
+      .select-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:10px 0; }
+      .actions { align-items:center; margin-top:10px; }
+      .bundle-remove { position:static; justify-self:end; line-height:18px; }
+      .summary { position:static; }
+      .checkout { grid-template-columns:1fr; }
+      .mobile-summary { display:flex; }
+      .checkout-right { order:-1; padding:0 16px 14px; border-bottom:1px solid #e5e5e5; }
+      .checkout-right.collapsed > :not(.mobile-summary) { display:none; }
+      .checkout-left { padding:20px; }
+      .order-item { grid-template-columns:56px minmax(0,1fr) auto; gap:12px; }
+      .order-img { width:56px; height:56px; }
+      .bundle-product-row { grid-template-columns:56px minmax(0,1fr); }
+      .row2, .row3 { grid-template-columns:1fr; gap:8px; }
+    }
+    @media (max-width:520px) {
+      .product-card { grid-template-columns:86px minmax(0,1fr); }
+      .thumb.large { width:86px; height:86px; }
+      .cart-card, .card { padding:14px; }
+      .top { flex-direction:column; align-items:stretch; }
+      .price { justify-content:flex-start; }
+      .qty-row { flex-wrap:wrap; }
+      .drawer-body { padding:12px 16px; }
+      .drawer-footer { padding:16px; }
+      .drawer-product { grid-template-columns:86px minmax(0,1fr); }
+      .drawer .thumb.large { width:86px; height:86px; }
+      .drawer-title { font-size:15px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <button class="brand" data-go="index">Neurix transaction prototype</button>
+    <div class="tabs">
+      <button data-go="cart-page">Cart page</button>
+      <button data-go="cart-drawer">Cart drawer</button>
+      <button data-go="checkout">Checkout</button>
+    </div>
+  </nav>
+  <main id="app"></main>
+  <button class="drawer-mask" id="mask" aria-label="Close cart"></button>
+  <aside class="drawer" id="drawer" aria-label="Cart drawer"></aside>
+  <script>
+    const money = (value) => '$' + Number(value || 0).toFixed(2);
+    const tagIcon = '<svg class="tag-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8.2 8.2 2.5h4.3v4.3l-5.7 5.7a1.4 1.4 0 0 1-2 0L2.5 10.2a1.4 1.4 0 0 1 0-2Z" stroke="currentColor" stroke-width="1.4"/><circle cx="10.8" cy="4.9" r=".8" fill="currentColor"/></svg>';
+    const products = [
+      { id:'p1', title:'01 Normal product - single variant', price:12.99, image:'IMG', attrs:[], variant:'', sub:'', discount:0 },
+      { id:'p2', title:'02 Normal product - multiple variants', price:18.99, image:'IMG', attrs:[['Mint','Citrus'],['12 Pack','24 Pack']], values:['Mint','24 Pack'], sub:'', discount:0 },
+      { id:'p4', title:'04 Normal product - single variant', price:10.39, compare:12.99, image:'IMG', attrs:[], variant:'', sub:'Delivery every 1 month', discount:2.60 },
+      { id:'p5', title:'05 Normal product - multiple variants', price:15.19, compare:18.99, image:'IMG', attrs:[['Mint','Citrus'],['12 Pack','24 Pack']], values:['Citrus','24 Pack'], sub:'Delivery every 2 months', discount:3.80 }
+    ];
+    const bundles = [
+      { id:'b1', title:'03 Bundle product - one-time purchase', price:42.00, compare:49.98, sub:'', children:[
+        { id:'b1a', title:'Bundle item A - Focus Gum', variant:'12 Pack', attrs:[], values:[] },
+        { id:'b1b', title:'Bundle item B - Refill Pack', attrs:[['Mint','Citrus'],['12 Pack','24 Pack']], values:['Mint','24 Pack'] }
+      ]},
+      { id:'b2', title:'06 Bundle product - with subscription', price:55.98, compare:69.97, sub:'Delivery every 2 months', children:[
+        { id:'b2a', title:'Bundle item A - Focus Gum', variant:'12 Pack', attrs:[], values:[] },
+        { id:'b2b', title:'Bundle item B - Refill Pack', attrs:[['Mint','Citrus'],['12 Pack','24 Pack']], values:['Citrus','24 Pack'] }
+      ]}
+    ];
+    const state = { view:'index', drawer:false };
+    const subtotal = 154.54;
+    const total = 144.54;
+    function currentView(){ return new URLSearchParams(location.search).get('view') || 'index'; }
+    function setView(view){ const url = new URL(location.href); url.searchParams.set('view', view); history.pushState({}, '', url); render(); }
+    function openSelect(button){ const select = button.closest('.select'); document.querySelectorAll('.select.open').forEach((el)=>{ if(el!==select) el.classList.remove('open'); }); select.classList.toggle('open'); }
+    function pickOption(button){ const select = button.closest('.select'); select.querySelector('.select-trigger span').textContent = button.textContent; select.querySelectorAll('.menu button').forEach((b)=>b.classList.remove('selected')); button.classList.add('selected'); select.classList.remove('open'); }
+    function controls(item, compact=false){
+      if (!item.attrs || !item.attrs.length) return item.variant ? `<div class="variant ${compact?'compact':''}">${item.variant}</div>` : '';
+      return `<div class="select-grid ${compact?'compact':''}">${item.attrs.map((opts,i)=>`<div class="select"><button class="select-trigger" onclick="openSelect(this)"><span>${item.values[i]}</span><i class="chev"></i></button><div class="menu">${opts.map((o)=>`<button onclick="pickOption(this)" class="${o===item.values[i]?'selected':''}">${o}</button>`).join('')}</div></div>`).join('')}</div>`;
+    }
+    function productCard(p, drawer=false){
+      return `<article class="${drawer?'drawer-card drawer-product':'card product-card'}"><div class="thumb large">${p.image}</div><div class="main"><div class="top"><strong class="${drawer?'drawer-title':'product-title'}">${p.title}</strong><div class="price">${p.compare?`<s>${money(p.compare)}</s>`:''}<span>${money(p.price)}</span></div></div>${controls(p)}${p.sub?`<div class="discount-tag">${tagIcon}<span>${p.sub} (-${money(p.discount)})</span></div>`:''}<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>`;
+    }
+    function bundleCard(bundle, drawer=false){
+      const savings = bundle.compare - bundle.price;
+      const label = bundle.sub ? `${bundle.sub} (-${money(savings)})` : `BUNDLE discount (-${money(savings)})`;
+      return `<article class="${drawer?'bundle-card':'card bundle-card'}"><div class="bundle-head"><div class="bundle-title"><span class="bundle-tag">Bundle</span>${bundle.title}</div><div class="price"><s>${money(bundle.compare)}</s><span>${money(bundle.price)}</span></div></div><div class="discount-tag">${tagIcon}<span>${label}</span></div><div class="bundle-children">${bundle.children.map((child)=>`<div class="bundle-child"><div class="thumb small">IMG</div><div><div class="bundle-child-title"><span class="included">Included</span>${child.title}</div>${controls(child,true)}</div></div>`).join('')}<button class="remove bundle-remove">Remove Bundle</button></div></article>`;
+    }
+    function summary(){ return `<aside class="summary"><h2>Order Summary</h2><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span><strong>-$10.00</strong></div><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><button class="primary" onclick="setView('checkout')">CHECK OUT</button></aside>`; }
+    function cartPage(){ return `<section class="page"><div class="wrap"><div class="crumb">Home / Cart</div><h1 class="title">Shopping Cart</h1><div class="cart-layout"><div class="list">${products.map((p)=>productCard(p)).join('')}${bundles.map((b)=>bundleCard(b)).join('')}</div>${summary()}</div></div></section>`; }
+    function entry(){ return `<section class="entry"><p class="entry-label">NEURIX USER-END TESTING</p><h1>Cart, drawer, and Checkout test entry</h1><p>Home, About us, and PDP are handled by development. This prototype keeps only the transaction states needed for QA across bundle and subscription scenarios.</p><div class="entry-grid"><button class="entry-card" data-go="cart-page"><strong>Cart page</strong><span>Full-page cart for normal products, variants, bundles, subscriptions, and subscription bundles.</span></button><button class="entry-card" data-go="cart-drawer"><strong>Cart drawer</strong><span>Side cart drawer with variant switching, bundle children, subscription labels, and checkout entry.</span></button><button class="entry-card" data-go="checkout"><strong>Checkout</strong><span>Checkout summary, express wallets, delivery form, card fields, bundle and subscription display.</span></button></div></section>`; }
+    function checkoutItems(){
+      const productRows = products.map((p)=>`<div class="order-item"><div class="order-img">IMG<span class="qty-badge">1</span></div><div><div class="order-title">${p.title}</div>${p.values?`<div class="order-variant">${p.values.join(', ')}</div>`:''}${p.sub?`<div class="discount-tag">${tagIcon}<span>${p.sub} (-${money(p.discount)})</span></div>`:''}</div><div class="order-price">${p.compare?`<s>${money(p.compare)}</s> `:''}${money(p.price)}</div></div>`).join('');
+      const bundleRows = bundles.map((b)=>{ const savings = b.compare - b.price; const label = b.sub ? `${b.sub} (-${money(savings)})` : `BUNDLE discount (-${money(savings)})`; return `<div class="summary-bundle"><div class="summary-bundle-head"><div class="summary-bundle-title"><span class="bundle-tag">Bundle</span>${b.title}</div><div class="summary-bundle-right"><div class="price"><s>${money(b.compare)}</s><span>${money(b.price)}</span></div><div class="discount-tag">${tagIcon}<span>${label}</span></div></div></div><div class="bundle-products">${b.children.map((c)=>`<div class="bundle-product-row"><div class="order-img">IMG<span class="qty-badge">1</span></div><div><div class="bundle-product-title"><span class="included">Included</span><span class="name">${c.title}</span></div><div class="order-variant">${c.attrs && c.attrs.length ? c.values.join(', ') : c.variant}</div></div></div>`).join('')}</div></div>`; }).join('');
+      return productRows + bundleRows;
+    }
+    function checkout(){ return `<section class="checkout"><div class="checkout-left"><div class="checkout-form"><div class="express-title">Express checkout</div><div class="wallet"><button class="wallet-main">PayPal</button><div class="wallet-row"><button>Apple Pay</button><button>Google Pay</button></div></div><div class="or">OR</div><div class="section"><div class="section-head"><h3>Contact</h3><a>Sign in</a></div><div class="field">Email</div></div><div class="section"><h3>Delivery</h3><div class="field">United States</div><div class="row2"><div class="field">First name</div><div class="field">Last name</div></div><div class="field">Address</div><div class="field">Apt, suite, unit,etc (optional)</div><div class="row3"><div class="field">State/province</div><div class="field">City</div><div class="field">ZIP code</div></div><div class="field">+1&nbsp;&nbsp; Phone number</div></div><div class="section"><h3>Shipping method</h3><div class="ship"><div class="ship-rate active"><span class="dot"></span><span><b>standard</b><br>Standard Shipping</span><b>Free</b></div><div class="ship-rate"><span class="dot"></span><span><b>express</b><br>Express Shipping</span><b>$8.90</b></div></div></div><div class="section"><h3>Payment</h3><div class="pay-card"><div class="pay-head"><span class="dot"></span><span>Card</span></div><div class="card-form"><div class="field">Card number</div><div class="row2"><div class="field">MM / YY</div><div class="field">CVC</div></div></div></div><button class="pay-now">PAY NOW</button></div></div></div><aside class="checkout-right"><div class="mobile-summary"><span>Order summary</span><strong>${money(total)}</strong></div><div>${checkoutItems()}</div><div class="row2" style="margin:18px 0"><div class="field">Discount code</div><button class="field" style="justify-content:center;color:#555">Apply</button></div><div class="checkout-summary"><div class="summary-row"><span>Subtotal · 8 Items</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span><strong>-$10.00</strong></div><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><div class="summary-row"><span>Shipping</span><strong>FREE</strong></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><div class="summary-savings">${tagIcon}<span>TOTAL SAVINGS $38.37</span></div></div></aside></section>`; }
+    function drawer(){ document.getElementById('drawer').innerHTML = `<div class="drawer-head"><h2>Cart</h2><button class="close" onclick="closeDrawer()">×</button></div><div class="drawer-body"><div class="drawer-list">${products.map((p)=>productCard(p,true)).join('')}${bundles.map((b)=>bundleCard(b,true)).join('')}</div></div><div class="drawer-footer"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span><strong>-$10.00</strong></div><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><div class="summary-row total"><span>Total</span><strong>${money(total)}</strong></div><button class="primary" style="width:100%; margin-top:16px" onclick="setView('checkout')">CHECK OUT</button></div>`; }
+    function closeDrawer(){ document.getElementById('mask').classList.remove('show'); document.getElementById('drawer').classList.remove('show'); }
+    function render(){ const view = currentView(); state.view = view; document.querySelectorAll('[data-go]').forEach((b)=>b.classList.toggle('active', b.dataset.go===view)); document.getElementById('app').innerHTML = view==='cart-page' ? cartPage() : view==='checkout' ? checkout() : entry(); drawer(); if (view==='cart-drawer') { document.getElementById('mask').classList.add('show'); document.getElementById('drawer').classList.add('show'); } else { closeDrawer(); } }
+    document.addEventListener('click', (event)=>{ const go = event.target.closest('[data-go]'); if (go) setView(go.dataset.go); if (event.target.id==='mask') closeDrawer(); if (!event.target.closest('.select')) document.querySelectorAll('.select.open').forEach((el)=>el.classList.remove('open')); });
+    window.addEventListener('popstate', render);
+    render();
+  </script>
+</body>
+</html>
