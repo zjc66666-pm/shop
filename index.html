@@ -233,10 +233,12 @@
       .checkout-right { order: -1; width: 100%; max-width: 100vw; overflow-x: hidden; padding: 0 16px 14px; border-bottom: 1px solid #e5e5e5; }
       .checkout-left { width: 100%; max-width: 100vw; padding: 20px; overflow-x: hidden; }
       .checkout-form { width: 100%; max-width: 100%; }
+      .checkout-summary-content { padding-top: 4px; }
       .order-item { grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 14px 0; }
       .order-img { width: 56px; height: 56px; }
       .order-item { position: relative; }
-      .order-price { position: absolute; top: 14px; right: 0; max-width: 92px; text-align: right; font-size: 14px; line-height: 1.25; white-space: normal; }
+      .order-price { position: absolute; top: 14px; right: 0; display: flex; max-width: 92px; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; font-size: 14px; line-height: 1.2; white-space: normal; }
+      .order-price s { display: block; }
       .order-info { grid-column: 2; grid-row: 1; padding-right: 96px; }
       .bundle-product-row .order-img { width: 56px; height: 56px; }
       .row2, .row3 { grid-template-columns: 1fr; gap: 8px; }
@@ -284,12 +286,13 @@
       .drawer .remove { line-height: 32px; }
       .drawer .select-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .summary-bundle-head { flex-direction: row; align-items: flex-start; }
-      .summary-bundle-right { flex: 0 1 38%; min-width: 96px; align-items: flex-end; text-align: right; }
+      .summary-bundle-right { flex: 0 1 42%; min-width: 128px; align-items: flex-end; text-align: right; }
       .summary-bundle-right .price { justify-content: flex-end; flex-wrap: wrap; row-gap: 0; }
-      .summary-bundle-right .discount-tag { justify-content: end; text-align: right; }
+      .summary-bundle-right .discount-tag { grid-template-columns: 12px minmax(0, 1fr); justify-content: end; text-align: right; }
       .discount-row { flex-direction: row; align-items: center; }
       .discount-row .field { min-width: 0; }
       .discount-row button { flex: 0 0 88px; }
+      .discount-row button.field { flex: 0 0 88px; min-width: 88px; }
       .checkout-summary .summary-row { gap: 12px; }
       .checkout-summary .summary-row span:first-child { min-width: 0; }
       .checkout-summary .summary-row strong { flex: 0 0 auto; text-align: right; }
