@@ -372,9 +372,12 @@
 
     function productCard(product, drawer = false) {
       const image = drawer ? imageHtml(product.image, product.title) : 'IMG';
-      const price = `<div class="price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span>${money(product.price)}</span></div>`;
+      const price = '<div class="price">' + (product.compare ? '<s>' + money(product.compare) + '</s>' : '') + '<span>' + money(product.price) + '</span></div>';
       if (drawer) {
-        return `<article class="drawer-card drawer-product"><div class="thumb large">${image}</div><div class="main"><strong class="drawer-title">${product.title}</strong>${controls(product)}${product.sub ? `<div class="discount-tag">${tagIcon}<span>${product.sub} (-${money(product.discount)})</span></div>` : ''}${price}<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>`;
+        const subscriptionTag = product.sub
+          ? '<div class="discount-tag">' + tagIcon + '<span>' + product.sub + ' (-' + money(product.discount) + ')</span></div>'
+          : '';
+        return '<article class="drawer-card drawer-product"><div class="thumb large">' + image + '</div><div class="main"><strong class="drawer-title">' + product.title + '</strong>' + controls(product) + subscriptionTag + price + '<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>';
       }
       return `<article class="${drawer ? 'drawer-card drawer-product' : 'card product-card'}"><div class="thumb large">${image}</div><div class="main"><div class="top"><strong class="${drawer ? 'drawer-title' : 'product-title'}">${product.title}</strong><div class="price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span>${money(product.price)}</span></div></div>${controls(product)}${product.sub ? `<div class="discount-tag">${tagIcon}<span>${product.sub} (-${money(product.discount)})</span></div>` : ''}<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>`;
     }
