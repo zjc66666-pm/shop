@@ -127,9 +127,13 @@
     .drawer .bundle-head { margin-bottom: 12px; }
     .drawer .bundle-children { padding-top: 10px; padding-bottom: 0; }
     .drawer .bundle-remove { position: static; justify-self: end; margin-top: 4px; line-height: 18px; }
-    .drawer-product .price { margin-top: 8px; }
-    .drawer-product .select-grid + .price { margin-top: 0; }
-    .drawer-product .discount-tag + .price { margin-top: 8px; }
+    .drawer-product .main { display: flex; flex-direction: column; }
+    .drawer-product .top { display: contents; }
+    .drawer-product .drawer-title { order: 1; }
+    .drawer-product .select-grid { order: 2; }
+    .drawer-product .discount-tag { order: 3; }
+    .drawer-product .price { order: 4; justify-content: flex-start; margin-top: 8px; }
+    .drawer-product .actions { order: 5; }
 
     .checkout { position: relative; z-index: 0; display: grid; grid-template-columns: 584px 440px; max-width: 1024px; min-height: 100vh; margin: 0 auto; background: #ffffff; }
     .checkout-left { position: relative; z-index: 1; padding: 40px 20px 48px; background: #ffffff; }
@@ -372,13 +376,6 @@
 
     function productCard(product, drawer = false) {
       const image = drawer ? imageHtml(product.image, product.title) : 'IMG';
-      const price = '<div class="price">' + (product.compare ? '<s>' + money(product.compare) + '</s>' : '') + '<span>' + money(product.price) + '</span></div>';
-      if (drawer) {
-        const subscriptionTag = product.sub
-          ? '<div class="discount-tag">' + tagIcon + '<span>' + product.sub + ' (-' + money(product.discount) + ')</span></div>'
-          : '';
-        return '<article class="drawer-card drawer-product"><div class="thumb large">' + image + '</div><div class="main"><strong class="drawer-title">' + product.title + '</strong>' + controls(product) + subscriptionTag + price + '<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>';
-      }
       return `<article class="${drawer ? 'drawer-card drawer-product' : 'card product-card'}"><div class="thumb large">${image}</div><div class="main"><div class="top"><strong class="${drawer ? 'drawer-title' : 'product-title'}">${product.title}</strong><div class="price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span>${money(product.price)}</span></div></div>${controls(product)}${product.sub ? `<div class="discount-tag">${tagIcon}<span>${product.sub} (-${money(product.discount)})</span></div>` : ''}<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>`;
     }
 
