@@ -144,6 +144,16 @@
     .section h3 { margin: 0 0 12px; color: #111111; font-size: 20px; }
     .section-head h3 { margin: 0; }
     .field { display: flex; align-items: center; gap: 10px; height: 44px; border: 1px solid #cfd2d6; border-radius: 4px; background: #ffffff; color: #b4b8bf; padding: 0 16px; margin-bottom: 12px; }
+    .field-label { display: block; margin: 0 0 10px; color: #222222; font-size: 14px; font-weight: 500; }
+    .field-label::before { content: "*"; margin-right: 4px; color: #ff4d4f; }
+    .country-field { position: relative; margin-bottom: 24px; }
+    .country-select { justify-content: space-between; padding-left: 65px; color: #222222; }
+    .flag-wrap { position: absolute; left: 10px; bottom: 7px; display: flex; align-items: center; width: 43px; height: 28px; border: 1px solid #eeeeee; background: #ffffff; }
+    .us-flag { width: 100%; height: 100%; }
+    .select-arrow { width: 7px; height: 7px; margin-top: -4px; border-right: 1px solid #9ca3af; border-bottom: 1px solid #9ca3af; transform: rotate(45deg); }
+    .phone-field { display: flex; align-items: stretch; gap: 0; height: 44px; margin-bottom: 12px; }
+    .phone-prefix { display: flex; align-items: center; justify-content: center; min-width: 60px; border: 1px solid #cfd2d6; border-right: 0; border-radius: 4px 0 0 4px; background: #ffffff; color: #222222; }
+    .phone-input { flex: 1 1 auto; height: 44px; border-radius: 0 4px 4px 0; margin-bottom: 0; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     .ship, .pay-card { overflow: hidden; border: 1px solid #d7d7da; border-radius: 8px; }
@@ -154,7 +164,15 @@
     .active .dot, .pay-head .dot { border-color: #222222; background: radial-gradient(circle, #ffffff 0 4px, #222222 5px); }
     .ship-rate b:last-child { margin-left: auto; }
     .pay-head { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid #eeeeee; }
+    .card-icons { display: inline-flex; align-items: center; gap: 3px; margin-left: auto; }
+    .card-icon { display: inline-flex; align-items: center; justify-content: center; height: 16px; min-width: 24px; border-radius: 2px; padding: 0 3px; background: #f7f7f7; color: #0a4ea3; font-size: 8px; font-weight: 800; line-height: 1; }
     .card-form { padding: 16px; }
+    .card-number-field { position: relative; display: flex; align-items: center; width: 100%; min-height: 46px; border: 1px solid #e0e0e0; border-radius: 5px; background: #ffffff; margin-bottom: 12px; }
+    .card-number-field input { width: 100%; height: 44px; padding: 0 150px 0 10px; border: 0; background: transparent; color: #222222; font-size: 14px; outline: 0; }
+    .card-number-field input::placeholder { color: #b4b8bf; }
+    .mock-card-brands { position: absolute; top: 50%; right: 10px; display: inline-flex; align-items: center; height: 22px; padding: 0 6px; border-radius: 3px; background: #f7f7f7; color: #0a4ea3; font-size: 10px; font-weight: 800; transform: translateY(-50%); white-space: nowrap; }
+    .card-input { width: 100%; min-height: 46px; padding: 0 10px; border: 1px solid #e0e0e0; border-radius: 5px; background: #ffffff; color: #222222; font-size: 14px; outline: 0; }
+    .card-input::placeholder { color: #b4b8bf; }
     .pay-now { width: 100%; height: 52px; border: 0; border-radius: 6px; background: #111111; color: #ffffff; cursor: pointer; font-size: 16px; font-weight: 900; }
 
     .order-item { display: grid; grid-template-columns: 100px minmax(0, 1fr) auto; gap: 16px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid #e5e7eb; }
@@ -291,6 +309,10 @@
       return src ? `<img src="${src}" alt="" loading="lazy" onerror="this.parentElement.classList.add('image-error')">` : 'IMG';
     }
 
+    function usFlag() {
+      return '<svg class="us-flag" viewBox="0 0 7410 3900" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#b22234" d="M0 0h7410v3900H0z"/><path stroke="#fff" stroke-width="300" d="M0 450h7410M0 1050h7410M0 1650h7410M0 2250h7410M0 2850h7410M0 3450h7410"/><path fill="#3c3b6e" d="M0 0h2964v2100H0z"/></svg>';
+    }
+
     function openSelect(button) {
       const select = button.closest('.select');
       document.querySelectorAll('.select.open').forEach((item) => {
@@ -348,7 +370,7 @@
     }
 
     function checkout() {
-      return `<section class="checkout"><div class="checkout-left"><div class="checkout-form"><div class="express-title">Express checkout</div><div class="wallet"><button class="wallet-main">PayPal</button><div class="wallet-row"><button>Apple Pay</button><button>Google Pay</button></div></div><div class="or">OR</div><div class="section"><div class="section-head"><h3>Contact</h3><a>Sign in</a></div><div class="field">Email</div></div><div class="section"><h3>Delivery</h3><div class="field">United States</div><div class="row2"><div class="field">First name</div><div class="field">Last name</div></div><div class="field">Address</div><div class="field">Apt, suite, unit,etc (optional)</div><div class="row3"><div class="field">State/province</div><div class="field">City</div><div class="field">ZIP code</div></div><div class="field">+1&nbsp;&nbsp; Phone number</div></div><div class="section"><h3>Shipping method</h3><div class="ship"><div class="ship-rate active"><span class="dot"></span><span><b>standard</b><br>Standard Shipping</span><b>Free</b></div><div class="ship-rate"><span class="dot"></span><span><b>express</b><br>Express Shipping</span><b>$8.90</b></div></div></div><div class="section"><h3>Payment</h3><div class="pay-card"><div class="pay-head"><span class="dot"></span><span>Card</span></div><div class="card-form"><div class="field">Card number</div><div class="row2"><div class="field">MM / YY</div><div class="field">CVC</div></div></div></div><button class="pay-now">PAY NOW</button></div></div></div><aside class="checkout-right"><div class="mobile-summary"><span>Order summary</span><strong>${money(total)}</strong></div><div>${checkoutItems()}</div><div class="discount-row"><div class="field">Discount code</div><button class="field">Apply</button></div><div class="checkout-summary"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span><strong>-$10.00</strong></div><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><div class="summary-row"><span>Shipping</span><strong>FREE</strong></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><div class="summary-savings">${tagIcon}<span>TOTAL SAVINGS $38.37</span></div></div></aside></section>`;
+      return `<section class="checkout"><div class="checkout-left"><div class="checkout-form"><div class="express-title">Express checkout</div><div class="wallet"><button class="wallet-main">PayPal</button><div class="wallet-row"><button>Apple Pay</button><button>Google Pay</button></div></div><div class="or">OR</div><div class="section"><div class="section-head"><h3>Contact</h3><a>Sign in</a></div><div class="field">Email</div></div><div class="section"><h3>Delivery</h3><div class="country-field"><label class="field-label">Country/Region</label><div class="flag-wrap">${usFlag()}</div><div class="field country-select"><span>United States</span><i class="select-arrow"></i></div></div><div class="row2"><div class="field">First name</div><div class="field">Last name</div></div><div class="field">Address</div><div class="field">Apt, suite, unit,etc (optional)</div><div class="row3"><div class="field">State/province</div><div class="field">City</div><div class="field">ZIP code</div></div><div class="phone-field"><div class="phone-prefix">+1</div><div class="field phone-input">Phone number</div></div></div><div class="section"><h3>Shipping method</h3><div class="ship"><div class="ship-rate active"><span class="dot"></span><span><b>standard</b><br>Standard Shipping</span><b>Free</b></div><div class="ship-rate"><span class="dot"></span><span><b>express</b><br>Express Shipping</span><b>$8.90</b></div></div></div><div class="section"><h3>Payment</h3><div class="pay-card"><div class="pay-head"><span class="dot"></span><span>Card</span><div class="card-icons"><span class="card-icon">VISA</span><span class="card-icon">MC</span><span class="card-icon">AMEX</span><span class="card-icon">DISC</span></div></div><div class="card-form"><div class="card-number-field"><input aria-label="Card number" placeholder="Card number"><span class="mock-card-brands">VISA MC AMEX DISC</span></div><div class="row2"><input class="card-input" aria-label="Expiry date" placeholder="MM / YY"><input class="card-input" aria-label="Security code" placeholder="CVC"></div></div></div><button class="pay-now">PAY NOW</button></div></div></div><aside class="checkout-right"><div class="mobile-summary"><span>Order summary</span><strong>${money(total)}</strong></div><div>${checkoutItems()}</div><div class="discount-row"><div class="field">Discount code</div><button class="field">Apply</button></div><div class="checkout-summary"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span><strong>-$10.00</strong></div><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><div class="summary-row"><span>Shipping</span><strong>FREE</strong></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><div class="summary-savings">${tagIcon}<span>TOTAL SAVINGS $38.37</span></div></div></aside></section>`;
     }
 
     function drawer() {
