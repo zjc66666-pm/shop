@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Neurix Transaction Prototype</title>
+  <title>Neurix user-end prototype</title>
   <style>
     :root {
       --ink: #111111;
@@ -40,6 +40,20 @@
     button, input { font: inherit; }
     button { -webkit-tap-highlight-color: transparent; }
     .hidden { display: none !important; }
+    body[data-view="account-orders"] > #nav,
+    body[data-view="account-address"] > #nav,
+    body[data-view="account-collections"] > #nav,
+    body[data-view="account-vendor"] > #nav,
+    body[data-view="order-detail"] > #nav,
+    body[data-view="login"] > #nav,
+    body[data-view="register"] > #nav,
+    body[data-view="reset-password"] > #nav,
+    body[data-view="account-password"] > #nav,
+    body[data-view="account-signout"] > #nav,
+    body[data-view="account-address-add"] > #nav,
+    body[data-view="account-address-delete"] > #nav,
+    body[data-view="order-cancel"] > #nav,
+    body[data-view="order-review-modal"] > #nav { display: none !important; }
 
     .nav { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 72px; padding: 0 40px; border-bottom: 1px solid var(--line); background: #ffffff; }
     .brand { border: 0; background: transparent; color: var(--ink); cursor: pointer; font-size: 18px; font-weight: 800; text-align: left; }
@@ -95,6 +109,8 @@
     .discount-tag { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; margin-top: 4px; color: #6b7280; font-size: 12px; font-weight: 500; line-height: 1.25; }
     .tag-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 14px; height: 14px; color: #9ca3af; font-size: 13px; line-height: 1; }
     .discount-tag span { min-width: 0; overflow-wrap: anywhere; }
+    .discount-stack { display: grid; align-items: start; gap: 4px; margin-top: 4px; }
+    .discount-stack .discount-tag { margin-top: 0; }
     .actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 14px; }
     .qty-row { display: inline-flex; align-items: center; gap: 8px; color: #666666; font-size: 12px; }
     .qty { display: inline-flex; align-items: center; height: 32px; overflow: hidden; border: 1px solid #e5e5e5; border-radius: 999px; background: #ffffff; }
@@ -354,20 +370,24 @@
       .checkout-summary .summary-total strong { font-size: 28px; line-height: 1; }
     }
   </style>
+  <link rel="stylesheet" href="assets/css/account.css">
 </head>
 <body>
   <nav class="nav" id="nav">
-    <button class="brand" data-go="index">Neurix transaction prototype</button>
+    <button class="brand" data-go="index">Neurix user-end prototype</button>
     <div class="tabs">
       <button data-go="cart-page">Cart page</button>
       <button data-go="cart-drawer">Cart drawer</button>
       <button data-go="checkout">Checkout</button>
+      <button data-go="account-orders">Account center</button>
+      <button data-go="login">Login</button>
     </div>
   </nav>
   <main id="app"></main>
   <button class="drawer-mask" id="mask" aria-label="Close cart"></button>
   <aside class="drawer" id="drawer" aria-label="Cart drawer"></aside>
 
+  <script src="assets/js/account.js"></script>
   <script>
     const money = (value) => '$' + Number(value || 0).toFixed(2);
     const tagIcon = '<i class="tag-icon iconfont3 icon3-biaoqian" aria-hidden="true"></i>';
@@ -379,8 +399,8 @@
     const products = [
       { id: 'p1', title: '01 Normal product - single variant', price: 12.99, image: imageA, attrs: [], variant: '', sub: '', discount: 0 },
       { id: 'p2', title: '02 Normal product - multiple variants', price: 18.99, image: imageB, attrs: [['Mint', 'Citrus'], ['12 Pack', '24 Pack']], values: ['Mint', '24 Pack'], sub: '', discount: 0 },
-      { id: 'p4', title: '04 Normal product - single variant', price: 10.39, compare: 12.99, image: imageA, attrs: [], variant: '', sub: 'Delivery every 1 month', discount: 2.60 },
-      { id: 'p5', title: '05 Normal product - multiple variants', price: 15.19, compare: 18.99, image: imageB, attrs: [['Mint', 'Citrus'], ['12 Pack', '24 Pack']], values: ['Citrus', '24 Pack'], sub: 'Delivery every 2 months', discount: 3.80 }
+      { id: 'p4', title: '04 Normal product - single variant', price: 9.35, compare: 12.99, image: imageA, attrs: [], variant: '', sub: 'Delivery every 1 month', discount: 2.60, productDiscount: 1.04 },
+      { id: 'p5', title: '05 Normal product - multiple variants', price: 13.67, compare: 18.99, image: imageB, attrs: [['Mint', 'Citrus'], ['12 Pack', '24 Pack']], values: ['Citrus', '24 Pack'], sub: 'Delivery every 2 months', discount: 3.80, productDiscount: 1.52 }
     ];
     const bundles = [
       { id: 'b1', title: '03 Bundle product - one-time purchase', price: 42.00, compare: 49.98, sub: '', children: [
@@ -392,8 +412,8 @@
         { id: 'b2b', title: 'Bundle item B - Refill Pack', image: imageB, attrs: [['Mint', 'Citrus'], ['12 Pack', '24 Pack']], values: ['Citrus', '24 Pack'] }
       ]}
     ];
-    const subtotal = 154.54;
-    const total = 144.54;
+    const subtotal = 152.98;
+    const total = 142.98;
 
     function currentView() {
       const view = new URLSearchParams(location.search).get('view') || 'index';
@@ -438,9 +458,20 @@
       return `<div class="select-grid ${compact ? 'compact' : ''}">${item.attrs.map((options, index) => `<div class="select"><button class="select-trigger" onclick="openSelect(this)"><span>${item.values[index]}</span><i class="chev"></i></button><div class="menu">${options.map((option) => `<button onclick="pickOption(this)" class="${option === item.values[index] ? 'selected' : ''}">${option}</button>`).join('')}</div></div>`).join('')}</div>`;
     }
 
+    function productDiscountTags(product) {
+      const tags = [];
+      if (product.sub) {
+        tags.push(`<div class="discount-tag">${tagIcon}<span>${product.sub} (-${money(product.discount)})</span></div>`);
+      }
+      if (product.productDiscount) {
+        tags.push(`<div class="discount-tag">${tagIcon}<span>Product Discount (-${money(product.productDiscount)})</span></div>`);
+      }
+      return tags.length ? `<div class="discount-stack">${tags.join('')}</div>` : '';
+    }
+
     function productCard(product, drawer = false) {
       const image = drawer ? imageHtml(product.image, product.title) : 'IMG';
-      return `<article class="${drawer ? 'drawer-card drawer-product' : 'card product-card'}"><div class="thumb large">${image}</div><div class="main"><div class="top"><strong class="${drawer ? 'drawer-title' : 'product-title'}">${product.title}</strong><div class="price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span>${money(product.price)}</span></div></div>${controls(product)}${product.sub ? `<div class="discount-tag">${tagIcon}<span>${product.sub} (-${money(product.discount)})</span></div>` : ''}<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>`;
+      return `<article class="${drawer ? 'drawer-card drawer-product' : 'card product-card'}"><div class="thumb large">${image}</div><div class="main"><div class="top"><strong class="${drawer ? 'drawer-title' : 'product-title'}">${product.title}</strong><div class="price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span>${money(product.price)}</span></div></div>${controls(product)}${productDiscountTags(product)}<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>`;
     }
 
     function bundleCard(bundle, drawer = false) {
@@ -462,7 +493,7 @@
     }
 
     function checkoutItems() {
-      const productRows = products.map((product) => `<div class="order-item"><div class="order-img">${imageHtml(product.image, product.title)}<span class="qty-badge">1</span></div><div class="order-info"><div class="order-title">${product.title}</div>${product.values ? `<div class="order-variant">${product.values.join(', ')}</div>` : ''}${product.sub ? `<div class="discount-tag">${tagIcon}<span>${product.sub} (-${money(product.discount)})</span></div>` : ''}</div><div class="order-price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span class="current-price">${money(product.price)}</span></div></div>`).join('');
+      const productRows = products.map((product) => `<div class="order-item"><div class="order-img">${imageHtml(product.image, product.title)}<span class="qty-badge">1</span></div><div class="order-info"><div class="order-title">${product.title}</div>${product.values ? `<div class="order-variant">${product.values.join(', ')}</div>` : ''}${productDiscountTags(product)}</div><div class="order-price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span class="current-price">${money(product.price)}</span></div></div>`).join('');
       const bundleRows = bundles.map((bundle) => {
         const savings = bundle.compare - bundle.price;
         const label = bundle.sub ? `${bundle.sub} (-${money(savings)})` : `BUNDLE discount (-${money(savings)})`;
@@ -472,7 +503,7 @@
     }
 
     function checkout() {
-      return `<section class="checkout mobile-summary-collapsed"><div class="checkout-left"><div class="checkout-form"><div class="express-title">Express checkout</div><div class="wallet"><button class="wallet-main">PayPal</button><div class="wallet-row"><button>Apple Pay</button><button>Google Pay</button></div></div><div class="or">OR</div><div class="section"><div class="section-head"><h3>Contact</h3><a>Sign in</a></div><div class="field">Email</div></div><div class="section"><h3>Delivery</h3><div class="country-field"><label class="field-label">Country/Region</label><div class="flag-wrap">${usFlag()}</div><div class="field country-select"><span>United States</span><i class="select-arrow"></i></div></div><div class="row2"><div class="field">First name</div><div class="field">Last name</div></div><div class="field">Address</div><div class="field">Apt, suite, unit,etc (optional)</div><div class="row3"><div class="field">State/province</div><div class="field">City</div><div class="field">ZIP code</div></div><div class="phone-field"><div class="phone-prefix">+1</div><div class="field phone-input">Phone number</div></div></div><div class="section"><h3>Shipping method</h3><div class="ship"><div class="ship-rate active"><span class="dot"></span><span><b>standard</b><br>Standard Shipping</span><b>Free</b></div><div class="ship-rate"><span class="dot"></span><span><b>express</b><br>Express Shipping</span><b>$8.90</b></div></div></div><div class="section"><h3>Payment</h3><div class="pay-card"><div class="pay-head"><span class="dot"></span><span>Card</span>${paymentIcons('card-icons')}</div><div class="card-form"><div class="card-number-field"><input aria-label="Card number" placeholder="Card number">${detectedCardIcon}</div><div class="row2"><input class="card-input" aria-label="Expiry date" placeholder="MM / YY"><input class="card-input" aria-label="Security code" placeholder="CVC"></div></div></div><button class="pay-now">PAY NOW</button><div class="pay-tip">By continuing, you agree to our <a>Terms of Service</a> and <a>Privacy Policy</a></div></div></div></div><aside class="checkout-right"><button class="mobile-summary" type="button" aria-expanded="false" onclick="toggleMobileSummary(this)"><span class="mobile-summary-title">Order summary <i class="summary-chevron"></i></span><strong class="mobile-summary-price">${money(total)}</strong></button><div class="checkout-summary-content"><div>${checkoutItems()}</div><div class="discount-row"><div class="field">Discount code</div><button class="field">Apply</button></div><div class="checkout-summary"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span></div><div class="checkout-discount-code"><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><strong>-$10.00</strong></div><div class="summary-row"><span>Shipping</span><strong>FREE</strong></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><div class="summary-savings">${tagIcon}<span>TOTAL SAVINGS $38.37</span></div></div></div></aside></section>`;
+      return `<section class="checkout mobile-summary-collapsed"><div class="checkout-left"><div class="checkout-form"><div class="express-title">Express checkout</div><div class="wallet"><button class="wallet-main">PayPal</button><div class="wallet-row"><button>Apple Pay</button><button>Google Pay</button></div></div><div class="or">OR</div><div class="section"><div class="section-head"><h3>Contact</h3><a>Sign in</a></div><div class="field">Email</div></div><div class="section"><h3>Delivery</h3><div class="country-field"><label class="field-label">Country/Region</label><div class="flag-wrap">${usFlag()}</div><div class="field country-select"><span>United States</span><i class="select-arrow"></i></div></div><div class="row2"><div class="field">First name</div><div class="field">Last name</div></div><div class="field">Address</div><div class="field">Apt, suite, unit,etc (optional)</div><div class="row3"><div class="field">State/province</div><div class="field">City</div><div class="field">ZIP code</div></div><div class="phone-field"><div class="phone-prefix">+1</div><div class="field phone-input">Phone number</div></div></div><div class="section"><h3>Shipping method</h3><div class="ship"><div class="ship-rate active"><span class="dot"></span><span><b>standard</b><br>Standard Shipping</span><b>Free</b></div><div class="ship-rate"><span class="dot"></span><span><b>express</b><br>Express Shipping</span><b>$8.90</b></div></div></div><div class="section"><h3>Payment</h3><div class="pay-card"><div class="pay-head"><span class="dot"></span><span>Card</span>${paymentIcons('card-icons')}</div><div class="card-form"><div class="card-number-field"><input aria-label="Card number" placeholder="Card number">${detectedCardIcon}</div><div class="row2"><input class="card-input" aria-label="Expiry date" placeholder="MM / YY"><input class="card-input" aria-label="Security code" placeholder="CVC"></div></div></div><button class="pay-now">PAY NOW</button><div class="pay-tip">By continuing, you agree to our <a>Terms of Service</a> and <a>Privacy Policy</a></div></div></div></div><aside class="checkout-right"><button class="mobile-summary" type="button" aria-expanded="false" onclick="toggleMobileSummary(this)"><span class="mobile-summary-title">Order summary <i class="summary-chevron"></i></span><strong class="mobile-summary-price">${money(total)}</strong></button><div class="checkout-summary-content"><div>${checkoutItems()}</div><div class="discount-row"><div class="field">Discount code</div><button class="field">Apply</button></div><div class="checkout-summary"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span></div><div class="checkout-discount-code"><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><strong>-$10.00</strong></div><div class="summary-row"><span>Shipping</span><strong>FREE</strong></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><div class="summary-savings">${tagIcon}<span>TOTAL SAVINGS $40.93</span></div></div></div></aside></section>`;
     }
 
     function toggleMobileSummary(button) {
@@ -493,9 +524,11 @@
 
     function render() {
       const view = currentView();
-      document.getElementById('nav').classList.toggle('hidden', view === 'checkout');
-      document.querySelectorAll('[data-go]').forEach((button) => button.classList.toggle('active', button.dataset.go === view));
-      document.getElementById('app').innerHTML = view === 'cart-page' ? cartPage() : view === 'checkout' ? checkout() : entry();
+      document.body.dataset.view = view;
+      document.getElementById('nav').classList.toggle('hidden', view === 'checkout' || view === 'account-orders' || view === 'account-address' || view === 'account-collections' || view === 'account-vendor' || view === 'order-detail' || view === 'login' || view === 'register' || view === 'reset-password' || view === 'account-password' || view === 'account-signout' || view === 'account-address-add' || view === 'account-address-delete' || view === 'order-cancel' || view === 'order-review-modal');
+      document.querySelectorAll('#nav [data-go]').forEach((button) => button.classList.toggle('active', button.dataset.go === view || (view === 'order-detail' && button.dataset.go === 'account-orders')));
+      const accountHtml = window.AccountPrototype ? window.AccountPrototype.renderView(view) : null;
+      document.getElementById('app').innerHTML = accountHtml || (view === 'cart-page' ? cartPage() : view === 'checkout' ? checkout() : entry());
       drawer();
       if (view === 'cart-drawer') {
         document.getElementById('mask').classList.add('show');

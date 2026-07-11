@@ -1,0 +1,239 @@
+﻿:root {
+  --account-ink: #111111;
+  --account-muted: #777777;
+  --account-line: #e8e8e8;
+}
+
+body[data-view="account-orders"],
+body[data-view="account-collections"],
+body[data-view="account-address"],
+body[data-view="account-vendor"],
+body[data-view="order-detail"],
+body[data-view="login"],
+body[data-view="register"],
+body[data-view="reset-password"],
+body[data-view="account-password"],
+body[data-view="account-signout"],
+body[data-view="account-address-add"],
+body[data-view="account-address-delete"],
+body[data-view="order-cancel"],
+body[data-view="order-review-modal"] {
+  background: #ffffff;
+}
+
+.account-design-root,
+.account-design-root * {
+  box-sizing: border-box;
+}
+
+.account-design-root {
+  min-height: 100vh;
+  background: #ffffff;
+  color: var(--account-ink);
+  font-family: "TT Norms Pro", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+.design-frame {
+  position: relative;
+  width: 100%;
+  max-width: calc(var(--design-w) * 1px);
+  margin: 0 auto;
+  overflow: hidden;
+  background: #ffffff;
+  line-height: 0;
+}
+
+.design-frame.tablet-design {
+  max-width: calc(var(--design-w) * 1px);
+}
+
+.design-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.design-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.design-hotspot {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  border: 0;
+  border-radius: 4px;
+  padding: 0;
+  background: rgba(0, 0, 0, 0);
+  color: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.08);
+}
+
+.design-hotspot:hover {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.design-hotspot:focus-visible {
+  outline: 2px solid rgba(17, 17, 17, 0.55);
+  outline-offset: 2px;
+}
+
+.mobile-design {
+  display: none;
+}
+
+.account-entry,
+.account-entry * {
+  box-sizing: border-box;
+}
+
+.account-entry {
+  width: min(100%, 1080px);
+  margin: 0 auto;
+  padding: 72px 40px;
+  background: #ffffff;
+  color: #111111;
+  font-family: "TT Norms Pro", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+.account-entry .entry-label {
+  margin: 0 0 12px;
+  color: #555555;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.account-entry h1 {
+  max-width: 760px;
+  margin: 0 0 16px;
+  color: #111111;
+  font-size: 46px;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.account-entry p {
+  max-width: 760px;
+  margin: 0 0 36px;
+  color: #555555;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.account-entry .entry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.account-entry .entry-card {
+  min-height: 172px;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 22px;
+  background: #ffffff;
+  color: #111111;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 160ms, box-shadow 160ms, transform 160ms;
+}
+
+.account-entry .entry-card:hover,
+.account-entry .entry-card:focus-visible {
+  border-color: #111111;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.account-entry .entry-card strong {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.account-entry .entry-card span {
+  display: block;
+  color: #555555;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.account-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 200;
+  min-width: 220px;
+  max-width: calc(100vw - 32px);
+  border-radius: 8px;
+  padding: 11px 16px;
+  background: #111111;
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+@media (min-width: 721px) {
+  .design-frame.pc-design {
+    display: block;
+  }
+
+  .design-frame.mobile-design {
+    display: none;
+  }
+
+  .auth-design {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02);
+  }
+}
+
+@media (max-width: 720px) {
+  .design-frame.pc-design {
+    display: none;
+  }
+
+  .design-frame.mobile-design {
+    display: block;
+    max-width: 100%;
+  }
+
+  .account-entry {
+    width: 100%;
+    padding: 44px 18px 28px;
+  }
+
+  .account-entry h1 {
+    font-size: 30px;
+    line-height: 1.14;
+  }
+
+  .account-entry p {
+    margin-bottom: 28px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .account-entry .entry-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .account-entry .entry-card {
+    min-height: 144px;
+    padding: 20px;
+  }
+
+  .account-entry .entry-card strong {
+    font-size: 18px;
+  }
+}
