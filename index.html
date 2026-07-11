@@ -108,6 +108,7 @@
     .variant.compact { margin: 6px 0 0; }
     .discount-tag { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; margin-top: 4px; color: #6b7280; font-size: 12px; font-weight: 500; line-height: 1.25; }
     .tag-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 14px; height: 14px; color: #9ca3af; font-size: 13px; line-height: 1; }
+    .recurring-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 14px; height: 14px; color: #9ca3af; }
     .discount-tag span { min-width: 0; overflow-wrap: anywhere; }
     .discount-stack { display: grid; align-items: start; gap: 4px; margin-top: 4px; }
     .discount-stack .discount-tag { margin-top: 0; }
@@ -123,6 +124,7 @@
     .bundle-price-block .price { justify-content: flex-end; }
     .bundle-price-block .price s { font-weight: 400; }
     .bundle-price-block .discount-tag { justify-content: flex-end; margin-top: 0; text-align: right; }
+    .bundle-price-block .discount-stack { justify-items: end; margin-top: 0; }
     .bundle-tag { display: inline-flex; flex: 0 0 auto; align-items: center; border-radius: 4px; padding: 4px 8px; background: #111111; color: #ffffff; font-size: 11px; font-weight: 800; line-height: normal; white-space: nowrap; }
     .bundle-children { position: relative; display: grid; gap: 12px; margin-top: 16px; border-top: 1px solid #f5f5f5; padding-top: 16px; padding-bottom: 8px; }
     .bundle-child { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 12px; align-items: start; }
@@ -258,6 +260,7 @@
     .summary-bundle-right .price { font-size: 16px; }
     .summary-bundle-right .price s { font-weight: 400; }
     .summary-bundle-right .discount-tag { display: grid; grid-template-columns: auto minmax(0, auto); align-items: center; justify-content: end; margin-top: 0; font-size: 11px; text-align: right; }
+    .summary-bundle-right .discount-stack { justify-items: end; margin-top: 0; }
     .bundle-products { display: grid; gap: 12px; padding: 10px 0 4px; }
     .bundle-product-row { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
     .bundle-product-row .order-img { flex: 0 0 auto; width: 70px; height: 70px; border: 1px solid #e0e0e0; }
@@ -391,6 +394,7 @@
   <script>
     const money = (value) => '$' + Number(value || 0).toFixed(2);
     const tagIcon = '<i class="tag-icon iconfont3 icon3-biaoqian" aria-hidden="true"></i>';
+    const recurringIcon = '<svg class="recurring-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-4.2L3 9"></path><path d="M3 4v5h5"></path><path d="M4 13a8 8 0 0 0 14.9 4.2L21 15"></path><path d="M21 20v-5h-5"></path></svg>';
     const visaIcon = '<svg class="payment-icon" viewBox="0 0 42 26" aria-hidden="true"><rect width="42" height="26" rx="3" fill="#ffffff" stroke="#d9dde3"/><text x="21" y="16" text-anchor="middle" font-size="9" font-weight="800" fill="#1434cb" font-family="Arial, sans-serif">VISA</text></svg>';
     const paymentIcons = (className) => `<span class="${className}" aria-hidden="true">${visaIcon}<svg class="payment-icon" viewBox="0 0 42 26"><rect width="42" height="26" rx="3" fill="#ffffff" stroke="#d9dde3"/><circle cx="18" cy="13" r="8" fill="#eb001b"/><circle cx="24" cy="13" r="8" fill="#f79e1b" fill-opacity=".92"/></svg><svg class="payment-icon" viewBox="0 0 42 26"><rect width="42" height="26" rx="3" fill="#2e77bc"/><text x="21" y="16" text-anchor="middle" font-size="8" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif">AMEX</text></svg><svg class="payment-icon" viewBox="0 0 42 26"><rect width="42" height="26" rx="3" fill="#ffffff" stroke="#d9dde3"/><path d="M26 3h13v20H26c4.5-3.7 6.7-7 6.7-10S30.5 6.7 26 3Z" fill="#f58220"/><text x="18" y="16" text-anchor="middle" font-size="7" font-weight="800" fill="#1f2937" font-family="Arial, sans-serif">DISC</text></svg></span>`;
     const detectedCardIcon = '<span class="mock-card-brands" aria-label="Detected card brand: Visa">' + visaIcon + '</span>';
@@ -403,11 +407,11 @@
       { id: 'p5', title: '05 Normal product - multiple variants', price: 13.67, compare: 18.99, image: imageB, attrs: [['Mint', 'Citrus'], ['12 Pack', '24 Pack']], values: ['Citrus', '24 Pack'], sub: 'Delivery every 2 months', discount: 3.80, productDiscount: 1.52 }
     ];
     const bundles = [
-      { id: 'b1', title: '03 Bundle product - one-time purchase', price: 42.00, compare: 49.98, sub: '', children: [
+      { id: 'b1', title: '03 Bundle product - one-time purchase', price: 42.00, compare: 49.98, oneTimePrice: 42.00, bundleDiscount: 7.98, subscriptionDiscount: 0, sub: '', children: [
         { id: 'b1a', title: 'Bundle item A - Focus Gum', image: imageA, variant: '12 Pack', attrs: [], values: [] },
         { id: 'b1b', title: 'Bundle item B - Refill Pack', image: imageB, attrs: [['Mint', 'Citrus'], ['12 Pack', '24 Pack']], values: ['Mint', '24 Pack'] }
       ]},
-      { id: 'b2', title: '06 Bundle product - with subscription', price: 55.98, compare: 69.97, sub: 'Delivery every 2 months', children: [
+      { id: 'b2', title: '06 Bundle product - with subscription', price: 55.98, compare: 69.97, oneTimePrice: 61.98, bundleDiscount: 7.99, subscriptionDiscount: 6.00, sub: 'Delivery every 2 months', children: [
         { id: 'b2a', title: 'Bundle item A - Focus Gum', image: imageA, variant: '12 Pack', attrs: [], values: [] },
         { id: 'b2b', title: 'Bundle item B - Refill Pack', image: imageB, attrs: [['Mint', 'Citrus'], ['12 Pack', '24 Pack']], values: ['Citrus', '24 Pack'] }
       ]}
@@ -469,15 +473,32 @@
       return tags.length ? `<div class="discount-stack">${tags.join('')}</div>` : '';
     }
 
+    function bundlePricing(bundle) {
+      const oneTimePrice = Number.isFinite(bundle.oneTimePrice) ? bundle.oneTimePrice : bundle.price;
+      const bundleDiscount = Number.isFinite(bundle.bundleDiscount) ? bundle.bundleDiscount : Math.max(0, (bundle.compare || 0) - oneTimePrice);
+      const subscriptionDiscount = bundle.sub ? (Number.isFinite(bundle.subscriptionDiscount) ? bundle.subscriptionDiscount : Math.max(0, oneTimePrice - bundle.price)) : 0;
+      return { bundleDiscount, subscriptionDiscount };
+    }
+
+    function bundleDiscountTags(bundle) {
+      const pricing = bundlePricing(bundle);
+      const tags = [];
+      if (pricing.bundleDiscount > 0) {
+        tags.push(`<div class="discount-tag">${tagIcon}<span>Bundle Discount (-${money(pricing.bundleDiscount)})</span></div>`);
+      }
+      if (bundle.sub && pricing.subscriptionDiscount > 0) {
+        tags.push(`<div class="discount-tag">${recurringIcon}<span>${bundle.sub} (-${money(pricing.subscriptionDiscount)})</span></div>`);
+      }
+      return tags.length ? `<div class="discount-stack">${tags.join('')}</div>` : '';
+    }
+
     function productCard(product, drawer = false) {
       const image = drawer ? imageHtml(product.image, product.title) : 'IMG';
       return `<article class="${drawer ? 'drawer-card drawer-product' : 'card product-card'}"><div class="thumb large">${image}</div><div class="main"><div class="top"><strong class="${drawer ? 'drawer-title' : 'product-title'}">${product.title}</strong><div class="price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span>${money(product.price)}</span></div></div>${controls(product)}${productDiscountTags(product)}<div class="actions"><div class="qty-row"><span>Quantity</span><div class="qty"><button>-</button><strong>1</strong><button>+</button></div></div><button class="remove">Remove</button></div></div></article>`;
     }
 
     function bundleCard(bundle, drawer = false) {
-      const savings = bundle.compare - bundle.price;
-      const label = bundle.sub ? `${bundle.sub} (-${money(savings)})` : `BUNDLE discount (-${money(savings)})`;
-      return `<article class="${drawer ? 'bundle-card' : 'card bundle-card'}"><div class="bundle-head"><div class="bundle-title"><span class="bundle-tag">Bundle</span><span>${bundle.title}</span></div><div class="bundle-price-block"><div class="price"><s>${money(bundle.compare)}</s><span>${money(bundle.price)}</span></div><div class="discount-tag">${tagIcon}<span>${label}</span></div></div></div><div class="bundle-children">${bundle.children.map((child) => `<div class="bundle-child"><div class="thumb small">${drawer ? imageHtml(child.image, child.title) : 'IMG'}</div><div><div class="bundle-child-title"><span class="included">Included</span><span>${child.title}</span></div>${controls(child, true)}</div></div>`).join('')}<button class="remove bundle-remove">Remove Bundle</button></div></article>`;
+      return `<article class="${drawer ? 'bundle-card' : 'card bundle-card'}"><div class="bundle-head"><div class="bundle-title"><span class="bundle-tag">Bundle</span><span>${bundle.title}</span></div><div class="bundle-price-block"><div class="price"><s>${money(bundle.compare)}</s><span>${money(bundle.price)}</span></div>${bundleDiscountTags(bundle)}</div></div><div class="bundle-children">${bundle.children.map((child) => `<div class="bundle-child"><div class="thumb small">${drawer ? imageHtml(child.image, child.title) : 'IMG'}</div><div><div class="bundle-child-title"><span class="included">Included</span><span>${child.title}</span></div>${controls(child, true)}</div></div>`).join('')}<button class="remove bundle-remove">Remove Bundle</button></div></article>`;
     }
 
     function summary() {
@@ -495,9 +516,7 @@
     function checkoutItems() {
       const productRows = products.map((product) => `<div class="order-item"><div class="order-img">${imageHtml(product.image, product.title)}<span class="qty-badge">1</span></div><div class="order-info"><div class="order-title">${product.title}</div>${product.values ? `<div class="order-variant">${product.values.join(', ')}</div>` : ''}${productDiscountTags(product)}</div><div class="order-price">${product.compare ? `<s>${money(product.compare)}</s>` : ''}<span class="current-price">${money(product.price)}</span></div></div>`).join('');
       const bundleRows = bundles.map((bundle) => {
-        const savings = bundle.compare - bundle.price;
-        const label = bundle.sub ? `${bundle.sub} (-${money(savings)})` : `BUNDLE discount (-${money(savings)})`;
-        return `<div class="summary-bundle"><div class="summary-bundle-head"><div class="summary-bundle-title"><span class="bundle-tag">Bundle</span><span class="summary-bundle-title-text">${bundle.title}</span></div><div class="summary-bundle-right"><div class="price"><s>${money(bundle.compare)}</s><span>${money(bundle.price)}</span></div><div class="discount-tag">${tagIcon}<span>${label}</span></div></div></div><div class="bundle-products">${bundle.children.map((child) => `<div class="bundle-product-row"><div class="order-img">${imageHtml(child.image, child.title)}<span class="qty-badge">1</span></div><div class="bundle-product-details"><div class="bundle-product-title"><span class="included">Included</span><span class="name">${child.title}</span></div><div class="order-variant">${child.attrs && child.attrs.length ? child.values.join(', ') : child.variant}</div></div></div>`).join('')}</div></div>`;
+        return `<div class="summary-bundle"><div class="summary-bundle-head"><div class="summary-bundle-title"><span class="bundle-tag">Bundle</span><span class="summary-bundle-title-text">${bundle.title}</span></div><div class="summary-bundle-right"><div class="price"><s>${money(bundle.compare)}</s><span>${money(bundle.price)}</span></div>${bundleDiscountTags(bundle)}</div></div><div class="bundle-products">${bundle.children.map((child) => `<div class="bundle-product-row"><div class="order-img">${imageHtml(child.image, child.title)}<span class="qty-badge">1</span></div><div class="bundle-product-details"><div class="bundle-product-title"><span class="included">Included</span><span class="name">${child.title}</span></div><div class="order-variant">${child.attrs && child.attrs.length ? child.values.join(', ') : child.variant}</div></div></div>`).join('')}</div></div>`;
       }).join('');
       return productRows + bundleRows;
     }
