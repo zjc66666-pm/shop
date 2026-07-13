@@ -58,6 +58,10 @@ body[data-view="order-review-modal"] {
   background: #ffffff;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 .account-design-root,
 .account-design-root * {
   box-sizing: border-box;
@@ -1790,6 +1794,9 @@ body[data-view="order-review-modal"] {
 
 .account-storefront-root {
   min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   color: #222222;
   font-family: "TT Norms Pro", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -1949,9 +1956,15 @@ body[data-view="order-review-modal"] {
 
 .account-storefront-main,
 .account-detail-main {
+  flex: 1 0 auto;
   width: min(1328px, calc(100% - 40px));
   margin: 0 auto;
   padding: 10px 0 58px;
+}
+
+.account-cart-main {
+  width: 100%;
+  padding: 0;
 }
 
 .account-storefront-breadcrumb {
@@ -1979,6 +1992,7 @@ body[data-view="order-review-modal"] {
   align-items: flex-start;
   gap: 40px;
   margin-top: 24px;
+  min-width: 0;
 }
 
 .account-storefront-sidebar {
@@ -2100,8 +2114,9 @@ body[data-view="order-review-modal"] {
 .account-storefront-signout .account-side-symbol { display: inline-block; width: auto; height: auto; flex: 0 0 auto; margin-right: 5px; font-size: 16px; line-height: 30px; }
 
 .account-storefront-content {
+  width: 0;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
 }
 
 .account-live-orders-section {
@@ -2109,7 +2124,7 @@ body[data-view="order-review-modal"] {
 }
 
 .account-view-section { min-width: 0; }
-.account-view-title { margin: 2px 0 16px; color: #222222; font-size: 20px; font-weight: 700; line-height: 1.2; }
+.account-view-title { margin: 0 0 16px; color: #222222; font-size: 20px; font-weight: 700; line-height: 1.2; }
 .account-account-empty { display: grid; min-height: 220px; place-content: center; gap: 8px; border: 1px solid #eaeaea; border-radius: 8px; color: #777777; text-align: center; }
 .account-account-empty strong { color: #222222; font-size: 16px; }
 
@@ -2152,6 +2167,19 @@ body[data-view="order-review-modal"] {
 .account-address-form input:not([type="checkbox"]):focus { border-color: #222222; }
 .account-address-form .account-address-form-wide { grid-column: 1 / -1; }
 .account-address-form .account-address-default-field { display: inline-flex; align-items: center; grid-column: 1 / -1; gap: 8px; margin-top: 2px; color: #333333; font-weight: 500; }
+
+.account-password-dialog { width: min(100%, 460px); }
+.account-signout-dialog { width: min(100%, 420px); }
+.account-password-form { display: grid; gap: 16px; margin-top: 24px; }
+.account-password-form label { display: grid; gap: 7px; color: #333333; font-size: 13px; font-weight: 600; }
+.account-password-form input { width: 100%; min-width: 0; height: 42px; border: 1px solid #d9d9d9; border-radius: 4px; padding: 0 12px; background: #ffffff; color: #222222; font: inherit; font-size: 14px; outline: 0; }
+.account-password-form input:focus { border-color: #222222; }
+.account-password-dialog .account-dialog-actions,
+.account-signout-dialog .account-dialog-actions { display: flex; align-items: center; flex-wrap: nowrap; justify-content: flex-end; gap: 12px; }
+.account-password-dialog .account-button,
+.account-signout-dialog .account-button { display: inline-flex; width: 132px; min-width: 0; height: 42px; flex: 0 0 132px; align-items: center; justify-content: center; margin: 0; border: 1px solid #d4d4d4; border-radius: 4px; padding: 0 12px; background: #ffffff; color: #222222; font: inherit; font-size: 14px; cursor: pointer; }
+.account-password-dialog .account-button.primary,
+.account-signout-dialog .account-button.primary { border-color: #222222; background: #222222; color: #ffffff; }
 .account-address-default-field input { width: 15px; height: 15px; margin: 0; accent-color: #222222; }
 
 
@@ -2688,6 +2716,7 @@ body[data-view="order-review-modal"] {
 .account-detail-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; padding: 18px 0 0; }
 
 .account-storefront-footer {
+  flex: 0 0 auto;
   border-top: 1px solid #f0f0f0;
   background: #f8f9fb;
 }

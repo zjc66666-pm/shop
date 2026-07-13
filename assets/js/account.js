@@ -15,6 +15,7 @@
     reviewImages: [],
     collectionRemoveId: '',
     addressDialog: null,
+    passwordForm: { current: '', next: '', confirm: '' },
     mobileNavOpen: false
   };
 
@@ -378,7 +379,7 @@
           <button class="account-currency">USD($)<span class="account-chev"></span></button>
           <button class="account-tool account-tool-search" aria-label="Search"><span></span></button>
           <button class="account-tool account-tool-user" data-go="account-orders" aria-label="Account"><i class="account-tool-icon account-icon account-icon--header-account" aria-hidden="true"></i></button>
-          <button class="account-tool account-tool-cart" data-go="cart-page" aria-label="Cart"><i class="account-tool-icon account-icon account-icon--header-cart" aria-hidden="true"></i><b>2</b></button>
+          <button class="account-tool account-tool-cart" data-cart-action="open-drawer" aria-label="Cart"><i class="account-tool-icon account-icon account-icon--header-cart" aria-hidden="true"></i><b>2</b></button>
         </div>
       </div>${mobileNavigationDrawer()}
     </header>`;
@@ -412,6 +413,15 @@
       </div>
       <div class="account-storefront-footer-bottom"><span>We Accept</span><div class="account-payment-chips" aria-label="Accepted payment methods"><img src="assets/images/payments/paypal.png" alt="PayPal"><img src="assets/images/payments/google-pay.svg" alt="Google Pay"><img src="assets/images/payments/apple-pay.svg" alt="Apple Pay"><img src="assets/images/payments/visa.svg" alt="Visa"><img src="assets/images/payments/mastercard.svg" alt="Mastercard"><img src="assets/images/payments/american-express.svg" alt="American Express"><img src="assets/images/payments/discover.png" alt="Discover"><img src="assets/images/payments/diners-club.svg" alt="Diners Club"><img src="assets/images/payments/jcb.png" alt="JCB"><img src="assets/images/payments/klarna.png" alt="Klarna"><img src="assets/images/payments/afterpay.png" alt="Afterpay"></div><small>© 2026 Bestvoy INC. All Rights Reserved.</small></div>
     </footer>`;
+  }
+
+  function storefrontShell(content, mainClass = '') {
+    const classes = mainClass ? ` ${mainClass}` : '';
+    return `<section class="account-storefront-root">
+      ${storefrontHeader()}
+      <main class="account-storefront-main${classes}">${content}</main>
+      ${storefrontFooter()}
+    </section>`;
   }
 
   function accountBreadcrumb(title) {
@@ -525,6 +535,36 @@
       <div class="account-live-order-list">${filteredOrders.length ? filteredOrders.map(orderCard).join('') : empty}</div>
       <div class="account-order-pagination" aria-label="Order pages"><span>‹</span><strong>1</strong><span>2</span><span>3</span><span>4</span><span>5</span><span>›</span></div>
       ${orderDialogs()}`);
+  }
+
+  function resetPasswordForm() {
+    state.passwordForm = { current: '', next: '', confirm: '' };
+  }
+
+  function passwordDialogHtml() {
+    const form = state.passwordForm;
+    return `<div class="account-dialog-backdrop" role="presentation"><section class="account-dialog account-password-dialog" role="dialog" aria-modal="true" aria-labelledby="change-password-title"><button class="account-dialog-close" data-account-action="modal-close" aria-label="Close">&times;</button><h2 id="change-password-title">Change Password</h2><div class="account-password-form"><label>Current password<input type="password" data-password-field="current" value="${h(form.current)}" autocomplete="current-password" placeholder="Enter current password"></label><label>New password<input type="password" data-password-field="next" value="${h(form.next)}" autocomplete="new-password" placeholder="At least 8 characters"></label><label>Confirm new password<input type="password" data-password-field="confirm" value="${h(form.confirm)}" autocomplete="new-password" placeholder="Enter new password again"></label></div><div class="account-dialog-actions"><button class="account-button secondary" data-account-action="modal-close">Cancel</button><button class="account-button primary" data-account-action="save-password">Save password</button></div></section></div>`;
+  }
+
+  function accountOverlayBackgroundHtml() {
+    const backView = state.lastAccountView || 'account-orders';
+    return backView === 'account-address'
+      ? addressHtml()
+      : backView === 'account-collections'
+        ? collectionsHtml()
+        : ordersHtml();
+  }
+
+  function accountPasswordHtml() {
+    return `${accountOverlayBackgroundHtml()}${passwordDialogHtml()}`;
+  }
+
+  function signoutDialogHtml() {
+    return `<div class="account-dialog-backdrop" role="presentation"><section class="account-dialog account-signout-dialog" role="dialog" aria-modal="true" aria-labelledby="signout-title"><button class="account-dialog-close" data-account-action="modal-close" aria-label="Close">&times;</button><h2 id="signout-title">Sign out</h2><p>Are you sure you want to sign out of your account?</p><div class="account-dialog-actions"><button class="account-button secondary" data-account-action="modal-close">Cancel</button><button class="account-button primary" data-account-action="signout-confirm">Sign out</button></div></section></div>`;
+  }
+
+  function accountSignoutHtml() {
+    return `${accountOverlayBackgroundHtml()}${signoutDialogHtml()}`;
   }
 
   function collectionRemoveDialog() {
@@ -815,8 +855,8 @@
     if (view === 'account-address') return addressHtml();
     if (view === 'order-detail') return detailHtml();
     if (view === 'login' || view === 'register' || view === 'reset-password') return authHtml(view);
-    if (view === 'account-password') return modalFrame('password');
-    if (view === 'account-signout') return modalFrame('signout');
+    if (view === 'account-password') return accountPasswordHtml();
+    if (view === 'account-signout') return accountSignoutHtml();
     if (view === 'account-address-add') { state.addressDialog = { mode: 'create', id: '' }; return addressHtml(); }
     if (view === 'account-address-delete') { state.addressDialog = { mode: 'delete', id: addressItems[0] ? addressItems[0].id : '' }; return addressHtml(); }
     if (view === 'order-cancel') return modalFrame('cancelOrder');
@@ -844,8 +884,17 @@
     if (action === 'password') { setView('account-password'); return; }
     if (action === 'signout') { setView('account-signout'); return; }
     if (action === 'signout-confirm') { toast('Signed out'); setView('index'); return; }
-    if (action === 'modal-close') { setView(state.lastAccountView || 'account-orders'); return; }
-    if (action === 'save-password') { toast('Password updated'); setView(state.lastAccountView || 'account-orders'); return; }
+    if (action === 'modal-close') { resetPasswordForm(); setView(state.lastAccountView || 'account-orders'); return; }
+    if (action === 'save-password') {
+      const form = state.passwordForm;
+      if (!form.current || !form.next || !form.confirm) { toast('Complete all password fields'); return; }
+      if (form.next.length < 8) { toast('Use at least 8 characters for your new password'); return; }
+      if (form.next !== form.confirm) { toast('New passwords do not match'); return; }
+      resetPasswordForm();
+      toast('Password updated');
+      setView(state.lastAccountView || 'account-orders');
+      return;
+    }
     if (action === 'address-add') { state.addressDialog = { mode: 'create', id: '' }; if (window.render) window.render(); return; }
     if (action === 'address-edit') { state.addressDialog = { mode: 'edit', id }; if (window.render) window.render(); return; }
     if (action === 'address-delete') { state.addressDialog = { mode: 'delete', id }; if (window.render) window.render(); return; }
@@ -1011,10 +1060,16 @@
 
   document.addEventListener('input', (event) => {
     const target = event.target;
-    if (!(target instanceof HTMLTextAreaElement) || !target.matches('[data-review-description]')) return;
-    state.reviewDescription = target.value.slice(0, 500);
-    const count = target.closest('.review-description-section')?.querySelector('[data-review-count]');
-    if (count) count.textContent = `${state.reviewDescription.length} / 500`;
+    if (target instanceof HTMLInputElement && target.matches('[data-password-field]')) {
+      const field = target.dataset.passwordField;
+      if (field === 'current' || field === 'next' || field === 'confirm') state.passwordForm[field] = target.value;
+      return;
+    }
+    if (target instanceof HTMLTextAreaElement && target.matches('[data-review-description]')) {
+      state.reviewDescription = target.value.slice(0, 500);
+      const count = target.closest('.review-description-section')?.querySelector('[data-review-count]');
+      if (count) count.textContent = `${state.reviewDescription.length} / 500`;
+    }
   });
 
   document.addEventListener('change', (event) => {
@@ -1036,5 +1091,5 @@
     if (window.render) window.render();
   });
 
-  window.AccountPrototype = { renderView };
+  window.AccountPrototype = { renderView, renderStorefrontShell: storefrontShell };
 })();

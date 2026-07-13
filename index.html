@@ -40,6 +40,8 @@
     button, input { font: inherit; }
     button { -webkit-tap-highlight-color: transparent; }
     .hidden { display: none !important; }
+    body[data-view="cart-page"] > #nav,
+    body[data-view="cart-drawer"] > #nav,
     body[data-view="account-orders"] > #nav,
     body[data-view="account-address"] > #nav,
     body[data-view="account-collections"] > #nav,
@@ -74,6 +76,9 @@
     .wrap { width: 100%; max-width: 1328px; margin: 0 auto; padding: 0 32px 50px; }
     .crumb { height: 58px; color: #9b9b9b; line-height: 58px; }
     .title { margin: 20px 0 24px; color: #222222; font-size: 32px; line-height: 1.2; text-align: center; }
+    .cart-storefront-page { width: 100%; background: #ffffff; }
+    .cart-storefront-wrap { width: min(1328px, calc(100% - 40px)); margin: 0 auto; padding: 0 0 58px; }
+    .cart-storefront-title { margin: 20px 0 24px; color: #222222; font-size: 32px; line-height: 1.2; text-align: center; }
     .cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 24px; }
     .list { display: grid; gap: 16px; }
     .card, .summary { border: 1px solid #efefef; border-radius: 8px; background: #ffffff; padding: 16px; }
@@ -159,6 +164,10 @@
     .drawer-footer { flex: 0 0 auto; border-top: 1px solid #eaeaea; padding: 20px 24px; background: #ffffff; }
     .drawer-footer .summary-row { margin-bottom: 8px; color: #222222; }
     .drawer-footer .total strong { font-size: 22px; }
+    .drawer-actions { display: grid; gap: 10px; margin-top: 16px; }
+    .drawer-actions .primary { width: 100%; }
+    .drawer-view-cart { width: 100%; height: 44px; border: 1px solid #222222; border-radius: 8px; background: #ffffff; color: #222222; cursor: pointer; font-weight: 800; }
+    .drawer-view-cart:hover, .drawer-view-cart:focus-visible { background: #f6f6f6; }
     .drawer .bundle-card { border: 1px solid #efefef; border-radius: 8px; padding: 14px 16px 16px; }
     .drawer .bundle-head { margin-bottom: 12px; }
     .drawer .bundle-children { padding-top: 10px; padding-bottom: 0; }
@@ -175,6 +184,8 @@
     .checkout-left { position: relative; z-index: 1; padding: 40px 20px 48px; background: #ffffff; }
     .checkout-left::before { position: absolute; top: 0; right: 100%; bottom: 0; z-index: -1; width: 100vw; background: #ffffff; content: ""; }
     .checkout-form { max-width: 620px; margin: 0 auto; }
+    .checkout-logo { display: flex; align-items: center; justify-content: center; width: 100%; border: 0; margin: 0 0 20px; padding: 0; background: transparent; color: #171717; cursor: pointer; font: inherit; font-size: 20px; font-weight: 800; line-height: 24px; text-align: center; }
+    .checkout-logo:focus-visible { outline: 2px solid #171717; outline-offset: 5px; }
     .checkout-right { position: relative; z-index: 1; background: #f9fafb; padding: 40px 16px 40px 40px; }
     .checkout-right::after { position: absolute; top: 0; bottom: 0; left: 100%; z-index: -1; width: 100vw; background: #f9fafb; content: ""; }
     .mobile-summary { display: none; align-items: center; justify-content: space-between; width: 100%; min-height: 28px; border: 0; padding: 16px 0 14px; background: #f9fafb; color: #111111; cursor: pointer; font: inherit; font-weight: 800; text-align: left; }
@@ -282,6 +293,7 @@
       .checkout { display: flex; flex-direction: column; width: 100%; max-width: 100%; overflow-x: hidden; }
       .checkout * { min-width: 0; }
       .checkout-left::before, .checkout-right::after { display: none; }
+      .checkout-logo { display: none; }
       .mobile-summary { display: flex; }
       .mobile-summary { border-bottom: 0 !important; box-shadow: none; }
       .checkout.mobile-summary-collapsed .checkout-summary-content { display: none; }
@@ -336,6 +348,8 @@
     }
 
     @media (max-width: 520px) {
+      .cart-storefront-wrap { width: min(100% - 32px, 1328px); padding-bottom: 32px; }
+      .cart-storefront-title { margin: 14px 0 18px; font-size: 26px; }
       .product-card { grid-template-columns: 86px minmax(0, 1fr); }
       .thumb.large { width: 86px; height: 86px; }
       .card { padding: 14px; }
@@ -372,7 +386,7 @@
       .checkout-summary .summary-total strong { font-size: 28px; line-height: 1; }
     }
   </style>
-  <link rel="stylesheet" href="assets/css/account.css?v=20260713q">
+  <link rel="stylesheet" href="assets/css/account.css?v=20260713ab">
 </head>
 <body>
   <nav class="nav" id="nav">
@@ -389,7 +403,7 @@
   <button class="drawer-mask" id="mask" aria-label="Close cart"></button>
   <aside class="drawer" id="drawer" aria-label="Cart drawer"></aside>
 
-  <script src="assets/js/account.js?v=20260713r"></script>
+  <script src="assets/js/account.js?v=20260713ab"></script>
   <script>
     const money = (value) => '$' + Number(value || 0).toFixed(2);
     const tagIcon = '<i class="tag-icon iconfont3 icon3-biaoqian" aria-hidden="true"></i>';
@@ -417,6 +431,7 @@
     ];
     const subtotal = 152.98;
     const total = 142.98;
+    let drawerReturnView = 'cart-page';
 
     function currentView() {
       const view = new URLSearchParams(location.search).get('view') || 'index';
@@ -505,7 +520,10 @@
     }
 
     function cartPage() {
-      return `<section class="page"><div class="wrap"><div class="crumb">Home / Cart</div><h1 class="title">Shopping Cart</h1><div class="cart-layout"><div class="list">${products.map((product) => productCard(product)).join('')}${bundles.map((bundle) => bundleCard(bundle)).join('')}</div>${summary()}</div></div></section>`;
+      const content = `<section class="cart-storefront-page"><div class="cart-storefront-wrap"><nav class="account-storefront-breadcrumb" aria-label="Breadcrumb"><button data-go="index">Home</button><span>›</span><strong>Cart</strong></nav><h1 class="cart-storefront-title">Shopping Cart</h1><div class="cart-layout"><div class="list">${products.map((product) => productCard(product)).join('')}${bundles.map((bundle) => bundleCard(bundle)).join('')}</div>${summary()}</div></div></section>`;
+      return window.AccountPrototype?.renderStorefrontShell
+        ? window.AccountPrototype.renderStorefrontShell(content, 'account-cart-main')
+        : `<section class="page">${content}</section>`;
     }
 
     function entry() {
@@ -521,7 +539,7 @@
     }
 
     function checkout() {
-      return `<section class="checkout mobile-summary-collapsed"><div class="checkout-left"><div class="checkout-form"><div class="express-title">Express checkout</div><div class="wallet"><button class="wallet-main">PayPal</button><div class="wallet-row"><button>Apple Pay</button><button>Google Pay</button></div></div><div class="or">OR</div><div class="section"><div class="section-head"><h3>Contact</h3><a>Sign in</a></div><div class="field">Email</div></div><div class="section"><h3>Delivery</h3><div class="country-field"><label class="field-label">Country/Region</label><div class="flag-wrap">${usFlag()}</div><div class="field country-select"><span>United States</span><i class="select-arrow"></i></div></div><div class="row2"><div class="field">First name</div><div class="field">Last name</div></div><div class="field">Address</div><div class="field">Apt, suite, unit,etc (optional)</div><div class="row3"><div class="field">State/province</div><div class="field">City</div><div class="field">ZIP code</div></div><div class="phone-field"><div class="phone-prefix">+1</div><div class="field phone-input">Phone number</div></div></div><div class="section"><h3>Shipping method</h3><div class="ship"><div class="ship-rate active"><span class="dot"></span><span><b>standard</b><br>Standard Shipping</span><b>Free</b></div><div class="ship-rate"><span class="dot"></span><span><b>express</b><br>Express Shipping</span><b>$8.90</b></div></div></div><div class="section"><h3>Payment</h3><div class="pay-card"><div class="pay-head"><span class="dot"></span><span>Card</span>${paymentIcons('card-icons')}</div><div class="card-form"><div class="card-number-field"><input aria-label="Card number" placeholder="Card number">${detectedCardIcon}</div><div class="row2"><input class="card-input" aria-label="Expiry date" placeholder="MM / YY"><input class="card-input" aria-label="Security code" placeholder="CVC"></div></div></div><button class="pay-now">PAY NOW</button><div class="pay-tip">By continuing, you agree to our <a>Terms of Service</a> and <a>Privacy Policy</a></div></div></div></div><aside class="checkout-right"><button class="mobile-summary" type="button" aria-expanded="false" onclick="toggleMobileSummary(this)"><span class="mobile-summary-title">Order summary <i class="summary-chevron"></i></span><strong class="mobile-summary-price">${money(total)}</strong></button><div class="checkout-summary-content"><div>${checkoutItems()}</div><div class="discount-row"><div class="field">Discount code</div><button class="field">Apply</button></div><div class="checkout-summary"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span></div><div class="checkout-discount-code"><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><strong>-$10.00</strong></div><div class="summary-row"><span>Shipping</span><strong>FREE</strong></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><div class="summary-savings">${tagIcon}<span>TOTAL SAVINGS $40.93</span></div></div></div></aside></section>`;
+      return `<section class="checkout mobile-summary-collapsed"><div class="checkout-left"><div class="checkout-form"><button class="checkout-logo" type="button" data-go="index" aria-label="Back to home">BESTVOY</button><div class="express-title">Express checkout</div><div class="wallet"><button class="wallet-main">PayPal</button><div class="wallet-row"><button>Apple Pay</button><button>Google Pay</button></div></div><div class="or">OR</div><div class="section"><div class="section-head"><h3>Contact</h3><a>Sign in</a></div><div class="field">Email</div></div><div class="section"><h3>Delivery</h3><div class="country-field"><label class="field-label">Country/Region</label><div class="flag-wrap">${usFlag()}</div><div class="field country-select"><span>United States</span><i class="select-arrow"></i></div></div><div class="row2"><div class="field">First name</div><div class="field">Last name</div></div><div class="field">Address</div><div class="field">Apt, suite, unit,etc (optional)</div><div class="row3"><div class="field">State/province</div><div class="field">City</div><div class="field">ZIP code</div></div><div class="phone-field"><div class="phone-prefix">+1</div><div class="field phone-input">Phone number</div></div></div><div class="section"><h3>Shipping method</h3><div class="ship"><div class="ship-rate active"><span class="dot"></span><span><b>standard</b><br>Standard Shipping</span><b>Free</b></div><div class="ship-rate"><span class="dot"></span><span><b>express</b><br>Express Shipping</span><b>$8.90</b></div></div></div><div class="section"><h3>Payment</h3><div class="pay-card"><div class="pay-head"><span class="dot"></span><span>Card</span>${paymentIcons('card-icons')}</div><div class="card-form"><div class="card-number-field"><input aria-label="Card number" placeholder="Card number">${detectedCardIcon}</div><div class="row2"><input class="card-input" aria-label="Expiry date" placeholder="MM / YY"><input class="card-input" aria-label="Security code" placeholder="CVC"></div></div></div><button class="pay-now">PAY NOW</button><div class="pay-tip">By continuing, you agree to our <a>Terms of Service</a> and <a>Privacy Policy</a></div></div></div></div><aside class="checkout-right"><button class="mobile-summary" type="button" aria-expanded="false" onclick="toggleMobileSummary(this)"><span class="mobile-summary-title">Order summary <i class="summary-chevron"></i></span><strong class="mobile-summary-price">${money(total)}</strong></button><div class="checkout-summary-content"><div>${checkoutItems()}</div><div class="discount-row"><div class="field">Discount code</div><button class="field">Apply</button></div><div class="checkout-summary"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span></div><div class="checkout-discount-code"><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><strong>-$10.00</strong></div><div class="summary-row"><span>Shipping</span><strong>FREE</strong></div><div class="summary-row summary-total"><span>Total</span><strong>${money(total)}</strong></div><div class="summary-savings">${tagIcon}<span>TOTAL SAVINGS $40.93</span></div></div></div></aside></section>`;
     }
 
     function toggleMobileSummary(button) {
@@ -532,31 +550,52 @@
     }
 
     function drawer() {
-      document.getElementById('drawer').innerHTML = `<div class="drawer-head"><h2>Cart</h2><button class="close" onclick="closeDrawer()" aria-label="Close cart"></button></div><div class="drawer-body"><div class="drawer-list">${products.map((product) => productCard(product, true)).join('')}${bundles.map((bundle) => bundleCard(bundle, true)).join('')}</div></div><div class="drawer-footer"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span></div><div class="checkout-discount-code"><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><strong>-$10.00</strong></div><div class="summary-row total"><span>Total</span><strong>${money(total)}</strong></div><button class="primary" style="width:100%; margin-top:16px" onclick="setView('checkout')">CHECK OUT</button></div>`;
+      document.getElementById('drawer').innerHTML = `<div class="drawer-head"><h2>Cart</h2><button class="close" data-cart-action="close-drawer" aria-label="Close cart"></button></div><div class="drawer-body"><div class="drawer-list">${products.map((product) => productCard(product, true)).join('')}${bundles.map((bundle) => bundleCard(bundle, true)).join('')}</div></div><div class="drawer-footer"><div class="summary-row"><span>Subtotal (8 Items)</span><strong>${money(subtotal)}</strong></div><div class="summary-row"><span>Order Discount</span></div><div class="checkout-discount-code"><div class="discount-tag">${tagIcon}<span>WELCOME10</span></div><strong>-$10.00</strong></div><div class="summary-row total"><span>Total</span><strong>${money(total)}</strong></div><div class="drawer-actions"><button class="primary" data-cart-action="checkout">CHECK OUT</button><button class="drawer-view-cart" data-cart-action="view-cart">VIEW CART</button></div></div>`;
     }
 
-    function closeDrawer() {
+    function hideDrawer() {
       document.getElementById('mask').classList.remove('show');
       document.getElementById('drawer').classList.remove('show');
     }
 
+    function openDrawer() {
+      const view = currentView();
+      if (view !== 'cart-drawer') drawerReturnView = view || 'cart-page';
+      setView('cart-drawer');
+    }
+
+    function closeDrawer() {
+      setView(drawerReturnView && drawerReturnView !== 'cart-drawer' ? drawerReturnView : 'cart-page');
+    }
+
     function render() {
       const view = currentView();
+      const pageView = view === 'cart-drawer' ? drawerReturnView : view;
       document.body.dataset.view = view;
-      document.getElementById('nav').classList.toggle('hidden', view === 'checkout' || view === 'account-orders' || view === 'account-address' || view === 'account-collections' || view === 'order-detail' || view === 'login' || view === 'register' || view === 'reset-password' || view === 'account-password' || view === 'account-signout' || view === 'account-address-add' || view === 'account-address-delete' || view === 'order-cancel' || view === 'order-review-modal');
+      document.getElementById('nav').classList.toggle('hidden', view === 'cart-page' || view === 'cart-drawer' || view === 'checkout' || view === 'account-orders' || view === 'account-address' || view === 'account-collections' || view === 'order-detail' || view === 'login' || view === 'register' || view === 'reset-password' || view === 'account-password' || view === 'account-signout' || view === 'account-address-add' || view === 'account-address-delete' || view === 'order-cancel' || view === 'order-review-modal');
       document.querySelectorAll('#nav [data-go]').forEach((button) => button.classList.toggle('active', button.dataset.go === view || (view === 'order-detail' && button.dataset.go === 'account-orders')));
-      const accountHtml = window.AccountPrototype ? window.AccountPrototype.renderView(view) : null;
-      document.getElementById('app').innerHTML = accountHtml || (view === 'cart-page' ? cartPage() : view === 'checkout' ? checkout() : entry());
+      const accountHtml = window.AccountPrototype ? window.AccountPrototype.renderView(pageView) : null;
+      document.getElementById('app').innerHTML = accountHtml || (pageView === 'cart-page' ? cartPage() : pageView === 'checkout' ? checkout() : entry());
       drawer();
       if (view === 'cart-drawer') {
         document.getElementById('mask').classList.add('show');
         document.getElementById('drawer').classList.add('show');
       } else {
-        closeDrawer();
+        hideDrawer();
       }
     }
 
     document.addEventListener('click', (event) => {
+      const cartAction = event.target.closest('[data-cart-action]');
+      if (cartAction) {
+        event.preventDefault();
+        const action = cartAction.dataset.cartAction;
+        if (action === 'open-drawer') openDrawer();
+        if (action === 'close-drawer') closeDrawer();
+        if (action === 'checkout') setView('checkout');
+        if (action === 'view-cart') setView('cart-page');
+        return;
+      }
       const go = event.target.closest('[data-go]');
       if (go) setView(go.dataset.go);
       if (event.target.id === 'mask') closeDrawer();
