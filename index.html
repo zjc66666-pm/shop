@@ -43,7 +43,6 @@
     body[data-view="account-orders"] > #nav,
     body[data-view="account-address"] > #nav,
     body[data-view="account-collections"] > #nav,
-    body[data-view="account-vendor"] > #nav,
     body[data-view="order-detail"] > #nav,
     body[data-view="login"] > #nav,
     body[data-view="register"] > #nav,
@@ -108,7 +107,7 @@
     .variant.compact { margin: 6px 0 0; }
     .discount-tag { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; margin-top: 4px; color: #6b7280; font-size: 12px; font-weight: 500; line-height: 1.25; }
     .tag-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 14px; height: 14px; color: #9ca3af; font-size: 13px; line-height: 1; }
-    .recurring-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 14px; height: 14px; color: #9ca3af; }
+    .recurring-icon { display: inline-block; flex: 0 0 auto; width: 14px; height: 14px; background: #9ca3af; -webkit-mask: url("assets/images/icons/refresh-cw.svg") center / contain no-repeat; mask: url("assets/images/icons/refresh-cw.svg") center / contain no-repeat; }
     .discount-tag span { min-width: 0; overflow-wrap: anywhere; }
     .discount-stack { display: grid; align-items: start; gap: 4px; margin-top: 4px; }
     .discount-stack .discount-tag { margin-top: 0; }
@@ -373,7 +372,7 @@
       .checkout-summary .summary-total strong { font-size: 28px; line-height: 1; }
     }
   </style>
-  <link rel="stylesheet" href="assets/css/account.css">
+  <link rel="stylesheet" href="assets/css/account.css?v=20260713q">
 </head>
 <body>
   <nav class="nav" id="nav">
@@ -390,11 +389,11 @@
   <button class="drawer-mask" id="mask" aria-label="Close cart"></button>
   <aside class="drawer" id="drawer" aria-label="Cart drawer"></aside>
 
-  <script src="assets/js/account.js"></script>
+  <script src="assets/js/account.js?v=20260713r"></script>
   <script>
     const money = (value) => '$' + Number(value || 0).toFixed(2);
     const tagIcon = '<i class="tag-icon iconfont3 icon3-biaoqian" aria-hidden="true"></i>';
-    const recurringIcon = '<svg class="recurring-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-4.2L3 9"></path><path d="M3 4v5h5"></path><path d="M4 13a8 8 0 0 0 14.9 4.2L21 15"></path><path d="M21 20v-5h-5"></path></svg>';
+    const recurringIcon = '<i class="recurring-icon" aria-hidden="true"></i>';
     const visaIcon = '<svg class="payment-icon" viewBox="0 0 42 26" aria-hidden="true"><rect width="42" height="26" rx="3" fill="#ffffff" stroke="#d9dde3"/><text x="21" y="16" text-anchor="middle" font-size="9" font-weight="800" fill="#1434cb" font-family="Arial, sans-serif">VISA</text></svg>';
     const paymentIcons = (className) => `<span class="${className}" aria-hidden="true">${visaIcon}<svg class="payment-icon" viewBox="0 0 42 26"><rect width="42" height="26" rx="3" fill="#ffffff" stroke="#d9dde3"/><circle cx="18" cy="13" r="8" fill="#eb001b"/><circle cx="24" cy="13" r="8" fill="#f79e1b" fill-opacity=".92"/></svg><svg class="payment-icon" viewBox="0 0 42 26"><rect width="42" height="26" rx="3" fill="#2e77bc"/><text x="21" y="16" text-anchor="middle" font-size="8" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif">AMEX</text></svg><svg class="payment-icon" viewBox="0 0 42 26"><rect width="42" height="26" rx="3" fill="#ffffff" stroke="#d9dde3"/><path d="M26 3h13v20H26c4.5-3.7 6.7-7 6.7-10S30.5 6.7 26 3Z" fill="#f58220"/><text x="18" y="16" text-anchor="middle" font-size="7" font-weight="800" fill="#1f2937" font-family="Arial, sans-serif">DISC</text></svg></span>`;
     const detectedCardIcon = '<span class="mock-card-brands" aria-label="Detected card brand: Visa">' + visaIcon + '</span>';
@@ -544,7 +543,7 @@
     function render() {
       const view = currentView();
       document.body.dataset.view = view;
-      document.getElementById('nav').classList.toggle('hidden', view === 'checkout' || view === 'account-orders' || view === 'account-address' || view === 'account-collections' || view === 'account-vendor' || view === 'order-detail' || view === 'login' || view === 'register' || view === 'reset-password' || view === 'account-password' || view === 'account-signout' || view === 'account-address-add' || view === 'account-address-delete' || view === 'order-cancel' || view === 'order-review-modal');
+      document.getElementById('nav').classList.toggle('hidden', view === 'checkout' || view === 'account-orders' || view === 'account-address' || view === 'account-collections' || view === 'order-detail' || view === 'login' || view === 'register' || view === 'reset-password' || view === 'account-password' || view === 'account-signout' || view === 'account-address-add' || view === 'account-address-delete' || view === 'order-cancel' || view === 'order-review-modal');
       document.querySelectorAll('#nav [data-go]').forEach((button) => button.classList.toggle('active', button.dataset.go === view || (view === 'order-detail' && button.dataset.go === 'account-orders')));
       const accountHtml = window.AccountPrototype ? window.AccountPrototype.renderView(view) : null;
       document.getElementById('app').innerHTML = accountHtml || (view === 'cart-page' ? cartPage() : view === 'checkout' ? checkout() : entry());

@@ -4,24 +4,208 @@
   const state = {
     toast: '',
     resetStep: 1,
-    lastAccountView: 'account-orders'
+    lastAccountView: 'account-orders',
+    orderFilter: 'all',
+    trackOrderId: '',
+    cancelOrderId: '',
+    reviewOrderId: '',
+    reviewItemIndex: -1,
+    reviewRatings: { product: 0, service: 0, shipping: 0 },
+    reviewDescription: '',
+    reviewImages: [],
+    collectionRemoveId: '',
+    addressDialog: null,
+    mobileNavOpen: false
+  };
+
+  const REVIEW_RATING_TEXTS = ['Very poor', 'Poor', 'Average', 'Good', 'Excellent'];
+
+  const PRODUCT_IMAGES = {
+    gum: 'assets/images/products/focus-gum.svg',
+    focus: 'assets/images/products/focus-pouch.svg'
   };
 
   const orders = {
-    FOL20250827001: { status: 'pay' },
-    FOL20250827002: { status: 'ship' },
-    FOL20250827003: { status: 'shipped' },
-    FOL20250827004: { status: 'review' },
-    FOL20250827005: { status: 'done' }
+    FOL20250827001: {
+      id: 'FOL20250827001', createdAt: 'Aug 27, 2025, 10:14 AM', status: 'to_pay', paymentStatus: 'Unpaid',
+      subtotal: 33.98, shippingFee: 0, total: 29.98, paidAmount: 0, totalSavings: 4.00,
+      orderDiscounts: [], shippingDiscounts: [], paymentMethod: 'Card',
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      timeline: [{ label: 'Order placed', time: 'Aug 27, 2025, 10:14 AM' }, { label: 'Awaiting payment', time: 'Aug 27, 2025, 10:14 AM' }],
+      items: [
+        { type: 'product', title: 'Neurix Focus & Energy Gum', variant: 'Mint / 12 Pack', qty: 1, price: 12.99, compare: 14.99, productDiscount: 2.00, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Neurix Focus & Energy Gum', variant: 'Citrus / 12 Pack', qty: 1, price: 16.99, compare: 18.99, productDiscount: 2.00, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827002: {
+      id: 'FOL20250827002', createdAt: 'Aug 27, 2025, 09:18 AM', status: 'to_ship', paymentStatus: 'Paid',
+      subtotal: 174.66, shippingFee: 8.99, total: 169.66, paidAmount: 169.66, totalSavings: 46.59,
+      orderDiscounts: [{ label: 'WELCOME5', amount: 5.00 }], shippingDiscounts: [{ label: 'FREESHIP', amount: 8.99 }], paymentMethod: 'Card',
+      subscription: { id: 'SUB-20471', frequency: 'Every 2 months', nextCharge: 'Oct 27, 2025' },
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      timeline: [{ label: 'Order placed', time: 'Aug 27, 2025, 09:18 AM' }, { label: 'Payment confirmed', time: 'Aug 27, 2025, 09:19 AM' }, { label: 'Preparing shipment', time: 'Aug 27, 2025, 09:20 AM' }],
+      items: [
+        { type: 'bundle', title: 'Coffee Office Pack', qty: 1, price: 55.98, compare: 69.97, bundleDiscount: 7.99, subscriptionDiscount: 6.00, subscription: { id: 'SUB-20471', frequency: 'Every 2 months' }, children: [
+          { title: 'Signature Blend Coffee 500g', variant: 'Whole bean, 2 Pack', qty: 2, image: PRODUCT_IMAGES.gum },
+          { title: 'Coffee Brew Guide', variant: 'Digital download', qty: 1, gift: true, image: PRODUCT_IMAGES.focus }
+        ] },
+        { type: 'bundle', title: 'Focus Gum - Multipack', qty: 1, price: 49.30, compare: 57.30, bundleDiscount: 8.00, children: [
+          { title: 'Neurix Focus & Energy Gum', variant: 'Mint / 12 Pack', qty: 2, image: PRODUCT_IMAGES.gum },
+          { title: 'Neurix Focus & Energy Gum', variant: 'Citrus / 12 Pack', qty: 2, image: PRODUCT_IMAGES.focus }
+        ] },
+        { type: 'product', title: 'Whey Protein 1kg', variant: 'Vanilla / 1kg', qty: 1, price: 31.59, compare: 39.00, subscriptionDiscount: 3.90, productDiscount: 3.51, subscription: { id: 'SUB-20472', frequency: 'Every 1 month' }, image: PRODUCT_IMAGES.focus },
+        { type: 'product', title: 'Daily Multivitamin (60 ct)', variant: '60 capsules', qty: 1, price: 28.80, compare: 32.00, productDiscount: 3.20, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Stainless Steel Coffee Scoop', variant: '30 ml', qty: 1, price: 8.99, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827003: {
+      id: 'FOL20250827003', createdAt: 'Aug 14, 2025, 08:40 AM', status: 'shipped', paymentStatus: 'Paid',
+      subtotal: 46.99, shippingFee: 0, total: 46.99, paidAmount: 46.99, totalSavings: 5.00,
+      orderDiscounts: [], shippingDiscounts: [], paymentMethod: 'PayPal',
+      subscription: { id: 'SUB-20452', frequency: 'Every 1 month', nextCharge: 'Sep 14, 2025' },
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      tracking: { carrier: 'USPS', number: '9400 1000 0000 0123 4567 89', stage: 'Arriving tomorrow' },
+      timeline: [{ label: 'Order placed', time: 'Aug 14, 2025, 08:40 AM' }, { label: 'Payment confirmed', time: 'Aug 14, 2025, 08:41 AM' }, { label: 'Shipped with USPS', time: 'Aug 15, 2025, 02:18 PM' }],
+      items: [
+        { type: 'product', title: 'Daily Multivitamin (60 ct)', variant: '60 capsules', qty: 1, price: 28.80, compare: 32.00, subscriptionDiscount: 1.60, productDiscount: 1.60, subscription: { id: 'SUB-20452', frequency: 'Every 1 month' }, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Vitamin D3', variant: '120 softgels', qty: 1, price: 18.19, compare: 19.99, subscriptionDiscount: 1.80, subscription: { id: 'SUB-20452', frequency: 'Every 1 month' }, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827004: {
+      id: 'FOL20250827004', createdAt: 'Jul 28, 2025, 01:06 PM', status: 'review', paymentStatus: 'Paid',
+      subtotal: 57.30, shippingFee: 0, total: 49.30, paidAmount: 49.30, totalSavings: 8.00,
+      orderDiscounts: [], shippingDiscounts: [], paymentMethod: 'Apple Pay',
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      tracking: { carrier: 'FedEx', number: '7849 1122 3344', stage: 'Delivered on Aug 1, 2025' },
+      timeline: [{ label: 'Order placed', time: 'Jul 28, 2025, 01:06 PM' }, { label: 'Shipped with FedEx', time: 'Jul 29, 2025, 10:24 AM' }, { label: 'Delivered', time: 'Aug 1, 2025, 03:12 PM' }],
+      items: [
+        { type: 'bundle', title: 'Focus Gum - Multipack', qty: 1, price: 49.30, compare: 57.30, bundleDiscount: 8.00, children: [
+          { title: 'Neurix Focus & Energy Gum', variant: 'Mint / 12 Pack', qty: 2, image: PRODUCT_IMAGES.gum },
+          { title: 'Neurix Focus & Energy Gum', variant: 'Citrus / 12 Pack', qty: 2, image: PRODUCT_IMAGES.focus }
+        ] }
+      ]
+    },
+    FOL20250827005: {
+      id: 'FOL20250827005', createdAt: 'Jul 02, 2025, 06:32 PM', status: 'done', paymentStatus: 'Paid',
+      subtotal: 89.99, shippingFee: 0, total: 89.99, paidAmount: 89.99, totalSavings: 0,
+      orderDiscounts: [], shippingDiscounts: [], paymentMethod: 'Card',
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      timeline: [{ label: 'Order placed', time: 'Jul 02, 2025, 06:32 PM' }, { label: 'Delivered', time: 'Jul 06, 2025, 11:04 AM' }, { label: 'Order completed', time: 'Jul 20, 2025, 11:04 AM' }],
+      items: [{ type: 'product', title: 'Neurix Daily Performance Pack', variant: '30-day supply', qty: 1, price: 89.99, image: PRODUCT_IMAGES.focus }]
+    },
+    FOL20250827006: {
+      id: 'FOL20250827006', createdAt: 'Jun 26, 2025, 04:22 PM', status: 'to_pay', paymentStatus: 'Unpaid',
+      subtotal: 116.35, shippingFee: 0, total: 109.35, paidAmount: 0, totalSavings: 32.61,
+      orderDiscounts: [{ label: 'PREPAY7', amount: 7.00 }], shippingDiscounts: [], paymentMethod: 'Card',
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      timeline: [{ label: 'Order placed', time: 'Jun 26, 2025, 04:22 PM' }, { label: 'Awaiting payment', time: 'Jun 26, 2025, 04:22 PM' }],
+      items: [
+        { type: 'bundle', title: 'Coffee Essentials Bundle', qty: 1, price: 49.98, compare: 63.98, bundleDiscount: 9.00, subscriptionDiscount: 5.00, subscription: { frequency: 'Every 1 month', pending: true }, children: [
+          { title: 'Signature Blend Coffee 500g', variant: 'Whole bean / 2 Pack', qty: 2, image: PRODUCT_IMAGES.gum },
+          { title: 'Coffee Brew Guide', variant: 'Digital download', qty: 1, gift: true, image: PRODUCT_IMAGES.focus }
+        ] },
+        { type: 'product', title: 'Whey Protein 1kg', variant: 'Vanilla / 1kg', qty: 1, price: 31.59, compare: 39.00, subscriptionDiscount: 3.90, productDiscount: 3.51, subscription: { frequency: 'Every 1 month', pending: true }, image: PRODUCT_IMAGES.focus },
+        { type: 'product', title: 'Daily Multivitamin (60 ct)', variant: '60 capsules', qty: 1, price: 25.79, compare: 29.99, productDiscount: 4.20, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Stainless Steel Coffee Scoop', variant: '30 ml', qty: 1, price: 8.99, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827007: {
+      id: 'FOL20250827007', createdAt: 'Jun 18, 2025, 11:03 AM', status: 'to_ship', paymentStatus: 'Paid',
+      subtotal: 43.98, shippingFee: 5.00, total: 43.98, paidAmount: 43.98, totalSavings: 5.00,
+      orderDiscounts: [], shippingDiscounts: [{ label: 'FREESHIP', amount: 5.00 }], paymentMethod: 'Google Pay',
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      timeline: [{ label: 'Order placed', time: 'Jun 18, 2025, 11:03 AM' }, { label: 'Payment confirmed', time: 'Jun 18, 2025, 11:04 AM' }, { label: 'Preparing shipment', time: 'Jun 18, 2025, 11:05 AM' }],
+      items: [
+        { type: 'product', title: 'Neurix Focus & Energy Gum', variant: 'Mint / 12 Pack', qty: 1, price: 16.99, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Neurix Focus & Energy Gum', variant: 'Citrus / 12 Pack', qty: 1, price: 26.99, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827008: {
+      id: 'FOL20250827008', createdAt: 'Jun 06, 2025, 02:47 PM', status: 'shipped', paymentStatus: 'Paid',
+      subtotal: 94.98, shippingFee: 7.99, total: 89.98, paidAmount: 89.98, totalSavings: 22.98,
+      orderDiscounts: [{ label: 'WELCOME5', amount: 5.00 }], shippingDiscounts: [{ label: 'FREESHIP', amount: 7.99 }], paymentMethod: 'Card',
+      subscription: { id: 'SUB-20448', frequency: 'Every 2 months', nextCharge: 'Aug 06, 2025' },
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      tracking: { carrier: 'UPS', number: '1Z999AA10123456784', stage: 'In transit' },
+      timeline: [{ label: 'Order placed', time: 'Jun 06, 2025, 02:47 PM' }, { label: 'Payment confirmed', time: 'Jun 06, 2025, 02:48 PM' }, { label: 'Shipped with UPS', time: 'Jun 07, 2025, 09:16 AM' }],
+      items: [
+        { type: 'bundle', title: 'Coffee Office Pack', qty: 1, price: 54.99, compare: 64.98, bundleDiscount: 4.99, subscriptionDiscount: 5.00, subscription: { id: 'SUB-20448', frequency: 'Every 2 months' }, children: [
+          { title: 'Signature Blend Coffee 500g', variant: 'Ground / 2 Pack', qty: 2, image: PRODUCT_IMAGES.gum },
+          { title: 'Coffee Brew Guide', variant: 'Digital download', qty: 1, gift: true, image: PRODUCT_IMAGES.focus }
+        ] },
+        { type: 'product', title: 'Neurix Daily Performance Pack', variant: '30-day supply', qty: 1, price: 39.99, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827009: {
+      id: 'FOL20250827009', createdAt: 'May 20, 2025, 09:36 AM', status: 'review', paymentStatus: 'Paid',
+      subtotal: 69.38, shippingFee: 0, total: 69.38, paidAmount: 69.38, totalSavings: 10.61,
+      orderDiscounts: [], shippingDiscounts: [], paymentMethod: 'PayPal',
+      subscription: { id: 'SUB-20436', frequency: 'Every 1 month', nextCharge: 'Jun 20, 2025' },
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      tracking: { carrier: 'FedEx', number: '7849 1122 8877', stage: 'Delivered on May 24, 2025' },
+      timeline: [{ label: 'Order placed', time: 'May 20, 2025, 09:36 AM' }, { label: 'Shipped with FedEx', time: 'May 21, 2025, 01:24 PM' }, { label: 'Delivered', time: 'May 24, 2025, 11:12 AM' }],
+      items: [
+        { type: 'product', title: 'Whey Protein 1kg', variant: 'Chocolate / 1kg', qty: 1, price: 31.59, compare: 39.00, subscriptionDiscount: 3.90, productDiscount: 3.51, subscription: { id: 'SUB-20436', frequency: 'Every 1 month' }, image: PRODUCT_IMAGES.focus },
+        { type: 'product', title: 'Daily Multivitamin (60 ct)', variant: '60 capsules', qty: 1, price: 28.80, compare: 32.00, productDiscount: 3.20, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Stainless Steel Coffee Scoop', variant: '30 ml', qty: 1, price: 8.99, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827010: {
+      id: 'FOL20250827010', createdAt: 'May 03, 2025, 03:15 PM', status: 'done', paymentStatus: 'Paid',
+      subtotal: 125.36, shippingFee: 8.99, total: 120.36, paidAmount: 120.36, totalSavings: 38.59,
+      orderDiscounts: [{ label: 'WELCOME5', amount: 5.00 }], shippingDiscounts: [{ label: 'FREESHIP', amount: 8.99 }], paymentMethod: 'Apple Pay',
+      subscription: { id: 'SUB-20422', frequency: 'Every 2 months', nextCharge: 'Jul 03, 2025' },
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      timeline: [{ label: 'Order placed', time: 'May 03, 2025, 03:15 PM' }, { label: 'Delivered', time: 'May 08, 2025, 02:41 PM' }, { label: 'All items reviewed', time: 'May 10, 2025, 11:04 AM' }, { label: 'Order completed', time: 'May 17, 2025, 11:04 AM' }],
+      items: [
+        { type: 'bundle', title: 'Coffee Office Pack', qty: 1, price: 55.98, compare: 69.97, bundleDiscount: 7.99, subscriptionDiscount: 6.00, subscription: { id: 'SUB-20422', frequency: 'Every 2 months' }, reviewed: true, children: [
+          { title: 'Signature Blend Coffee 500g', variant: 'Whole bean / 2 Pack', qty: 2, image: PRODUCT_IMAGES.gum },
+          { title: 'Coffee Brew Guide', variant: 'Digital download', qty: 1, gift: true, image: PRODUCT_IMAGES.focus }
+        ] },
+        { type: 'product', title: 'Whey Protein 1kg', variant: 'Vanilla / 1kg', qty: 1, price: 31.59, compare: 39.00, subscriptionDiscount: 3.90, productDiscount: 3.51, subscription: { id: 'SUB-20423', frequency: 'Every 1 month' }, reviewed: true, image: PRODUCT_IMAGES.focus },
+        { type: 'product', title: 'Daily Multivitamin (60 ct)', variant: '60 capsules', qty: 1, price: 28.80, compare: 32.00, productDiscount: 3.20, reviewed: true, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Stainless Steel Coffee Scoop', variant: '30 ml', qty: 1, price: 8.99, reviewed: true, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827011: {
+      id: 'FOL20250827011', createdAt: 'Apr 17, 2025, 10:19 AM', status: 'cancelled', paymentStatus: 'Cancelled',
+      subtotal: 42.98, shippingFee: 0, total: 42.98, paidAmount: 0, totalSavings: 4.20,
+      orderDiscounts: [], shippingDiscounts: [], paymentMethod: 'Card',
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      timeline: [{ label: 'Order placed', time: 'Apr 17, 2025, 10:19 AM' }, { label: 'Order cancelled', time: 'Apr 17, 2025, 10:34 AM' }],
+      items: [
+        { type: 'product', title: 'Daily Multivitamin (60 ct)', variant: '60 capsules', qty: 1, price: 25.79, compare: 29.99, productDiscount: 4.20, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Stainless Steel Coffee Scoop', variant: '30 ml', qty: 1, price: 17.19, image: PRODUCT_IMAGES.focus }
+      ]
+    },
+    FOL20250827012: {
+      id: 'FOL20250827012', createdAt: 'Apr 02, 2025, 05:44 PM', status: 'cancelled', paymentStatus: 'Refunded',
+      subtotal: 116.35, shippingFee: 0, total: 109.35, paidAmount: 109.35, totalSavings: 32.61,
+      orderDiscounts: [{ label: 'WELCOME7', amount: 7.00 }], shippingDiscounts: [], paymentMethod: 'Google Pay',
+      shipping: { name: 'Alex Morgan', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], phone: '+1 206 555 0188' },
+      timeline: [{ label: 'Order placed', time: 'Apr 02, 2025, 05:44 PM' }, { label: 'Payment confirmed', time: 'Apr 02, 2025, 05:45 PM' }, { label: 'Order cancelled', time: 'Apr 03, 2025, 09:10 AM' }, { label: 'Refunded', time: 'Apr 05, 2025, 01:28 PM' }],
+      items: [
+        { type: 'bundle', title: 'Coffee Essentials Bundle', qty: 1, price: 49.98, compare: 63.98, bundleDiscount: 9.00, subscriptionDiscount: 5.00, subscription: { frequency: 'Every 1 month', pending: true }, children: [
+          { title: 'Signature Blend Coffee 500g', variant: 'Whole bean / 2 Pack', qty: 2, image: PRODUCT_IMAGES.gum },
+          { title: 'Coffee Brew Guide', variant: 'Digital download', qty: 1, gift: true, image: PRODUCT_IMAGES.focus }
+        ] },
+        { type: 'product', title: 'Whey Protein 1kg', variant: 'Vanilla / 1kg', qty: 1, price: 31.59, compare: 39.00, subscriptionDiscount: 3.90, productDiscount: 3.51, subscription: { frequency: 'Every 1 month', pending: true }, image: PRODUCT_IMAGES.focus },
+        { type: 'product', title: 'Daily Multivitamin (60 ct)', variant: '60 capsules', qty: 1, price: 25.79, compare: 29.99, productDiscount: 4.20, image: PRODUCT_IMAGES.gum },
+        { type: 'product', title: 'Stainless Steel Coffee Scoop', variant: '30 ml', qty: 1, price: 8.99, image: PRODUCT_IMAGES.focus }
+      ]
+    }
   };
 
-  const detailAsset = {
-    pay: ['order-detail-pay-pc.png', 'order-detail-pay-mobile.jpg', 1920, 1797, 786, 5030],
-    ship: ['order-detail-ship-pc.png', 'order-detail-ship-mobile.jpg', 1920, 1410, 786, 3498],
-    shipped: ['order-detail-shipped-pc.png', 'order-detail-shipped-mobile.jpg', 1920, 1518, 786, 3994],
-    review: ['order-detail-review-pc.png', 'order-detail-review-mobile.jpg', 1920, 1518, 786, 4498],
-    done: ['order-detail-done-desktop.png', 'order-detail-done-mobile.jpg', 1024, 1529, 786, 3698]
-  };
+  const collectionItems = [
+    { id: 'COL-01', title: 'Neurix Focus & Energy Gum', price: 12.99, compare: 14.99, image: PRODUCT_IMAGES.gum },
+    { id: 'COL-02', title: 'Whey Protein 1kg', price: 31.59, compare: 39.00, image: PRODUCT_IMAGES.focus },
+    { id: 'COL-03', title: 'Daily Multivitamin (60 ct)', price: 28.80, compare: 32.00, image: PRODUCT_IMAGES.gum }
+  ];
+
+  const addressItems = [
+    { id: 'ADDR-01', name: 'Alex Morgan', phone: '+1 206 555 0188', email: 'alex.morgan@email.com', lines: ['118 King Street, Suite 6', 'Seattle, WA 98101', 'United States'], isDefault: true },
+    { id: 'ADDR-02', name: 'Alex Morgan', phone: '+1 425 555 0146', email: 'alex.morgan@email.com', lines: ['412 Sunset Avenue', 'Bellevue, WA 98004', 'United States'], isDefault: false }
+  ];
 
   function h(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, (char) => ({
@@ -114,8 +298,7 @@
       { x: 270, y: 350, w: 145, h: 42, go: 'account-orders', label: 'My orders' },
       { x: 270, y: 412, w: 145, h: 42, go: 'account-collections', label: 'Collections' },
       { x: 270, y: 474, w: 145, h: 42, go: 'account-address', label: 'Address Book' },
-      { x: 270, y: 536, w: 160, h: 42, go: 'account-vendor', label: 'Become a vendor' },
-      { x: 270, y: 608, w: 145, h: 42, action: 'signout', label: 'Sign out' }
+      { x: 270, y: 536, w: 145, h: 42, action: 'signout', label: 'Sign out' }
     ];
     const mobile = [
       { x: 650, y: 138, w: 52, h: 52, action: 'password', label: 'Edit password' },
@@ -127,111 +310,420 @@
     return { pc, mobile };
   }
 
+  const ORDER_STATUS = {
+    all: { label: 'All' },
+    to_pay: { label: 'To pay', tone: 'warning', progress: 0 },
+    to_ship: { label: 'To ship', tone: 'active', progress: 1 },
+    shipped: { label: 'Shipped', tone: 'active', progress: 2 },
+    review: { label: 'Awaiting Review', tone: 'success', progress: 3 },
+    done: { label: 'Done', tone: 'muted', progress: 4 },
+    cancelled: { label: 'Cancelled', tone: 'muted', progress: 0 }
+  };
+
+  const ORDER_FILTERS = [
+    ['all', 'All orders'], ['to_pay', 'To pay'], ['to_ship', 'To ship'], ['shipped', 'Shipped'],
+    ['review', 'Awaiting Review'], ['done', 'Done'], ['cancelled', 'Cancelled']
+  ];
+
+  function money(value) {
+    return `$${Number(value || 0).toFixed(2)}`;
+  }
+
+  function orderStatus(order) {
+    return ORDER_STATUS[order.status] || ORDER_STATUS.to_ship;
+  }
+
+  function orderHasBundle(order) {
+    return order.items.some((item) => item.type === 'bundle');
+  }
+
+  function orderHasSubscription(order) {
+    return order.items.some((item) => item.subscription);
+  }
+
+  function orderHasDiscount(order) {
+    return order.items.some((item) => item.bundleDiscount || item.subscriptionDiscount || item.productDiscount) || order.orderDiscounts.length || order.shippingDiscounts.length;
+  }
+
+  function orderItemCount(order) {
+    return order.items.reduce((count, item) => count + Number(item.qty || 1), 0);
+  }
+
+  function orderPreviewImages(order) {
+    const images = [];
+    order.items.forEach((item) => {
+      if (item.type === 'bundle' && item.children && item.children.length) images.push(item.children[0].image);
+      else if (item.image) images.push(item.image);
+    });
+    return images.filter(Boolean).slice(0, 2);
+  }
+
+  function orderSummary(order) {
+    const first = order.items[0];
+    if (!first) return 'No items';
+    const remaining = Math.max(0, order.items.length - 1);
+    return `${first.title}${remaining ? ` + ${remaining} more item${remaining > 1 ? 's' : ''}` : ''}`;
+  }
+
+  function storefrontHeader() {
+    return `<header class="account-storefront-header">
+      <div class="account-storefront-header-inner">
+        <button class="account-mobile-menu-button" data-account-action="mobile-nav-toggle" aria-label="${state.mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}" aria-expanded="${state.mobileNavOpen}" aria-controls="account-mobile-nav-drawer"><span aria-hidden="true"></span></button>
+        <button class="account-storefront-brand" data-go="index" aria-label="Back to home">BESTVOY</button>
+        <nav class="account-storefront-nav" aria-label="Store navigation">
+          <button data-go="index">Home</button><button data-go="index">All Products</button><button data-go="index">All Reviews</button>
+          <button data-go="index">Blog</button><button data-go="account-orders">Order Tracking</button><button data-go="index">About Us</button>
+        </nav>
+        <div class="account-storefront-tools">
+          <button class="account-currency">USD($)<span class="account-chev"></span></button>
+          <button class="account-tool account-tool-search" aria-label="Search"><span></span></button>
+          <button class="account-tool account-tool-user" data-go="account-orders" aria-label="Account"><i class="account-tool-icon account-icon account-icon--header-account" aria-hidden="true"></i></button>
+          <button class="account-tool account-tool-cart" data-go="cart-page" aria-label="Cart"><i class="account-tool-icon account-icon account-icon--header-cart" aria-hidden="true"></i><b>2</b></button>
+        </div>
+      </div>${mobileNavigationDrawer()}
+    </header>`;
+  }
+
+  function mobileNavigationDrawer() {
+    const items = [
+      ['index', 'Home'], ['index', 'All Products'], ['index', 'All Reviews'],
+      ['index', 'Blog'], ['account-orders', 'Order Tracking'], ['index', 'About Us']
+    ];
+    const tabIndex = state.mobileNavOpen ? '0' : '-1';
+    return `<div class="account-mobile-nav-drawer ${state.mobileNavOpen ? 'is-open' : ''}" aria-hidden="${!state.mobileNavOpen}">
+      <button class="account-mobile-nav-backdrop" data-account-action="mobile-nav-close" aria-label="Close navigation menu" tabindex="${tabIndex}"></button>
+      <aside class="account-mobile-nav-panel" id="account-mobile-nav-drawer" aria-label="Mobile navigation">
+        <strong>BESTVOY</strong>
+        <nav>${items.map(([view, label]) => `<button data-account-action="mobile-nav-go" data-go="${view}" tabindex="${tabIndex}">${label}</button>`).join('')}</nav>
+      </aside>
+    </div>`;
+  }
+
+  function storefrontFooter() {
+    return `<footer class="account-storefront-footer">
+      <div class="account-storefront-footer-inner">
+        <div class="account-footer-links">
+          <section><strong>Shop</strong><span>Blog</span><span>All Reviews</span><span>Sitemap</span></section>
+          <section><strong>Support</strong><span>About Us</span><span>Contact Us</span><span>Payment Method</span><span>Order Tracking</span></section>
+          <section><strong>Legal & Privacy</strong><span>Terms of Service</span><span>Privacy Policy</span><span>Cookie Policy</span><span>Cookies Settings</span></section>
+          <section><strong>Policies</strong><span>Shipping Policy</span><span>Return & Refund Policy</span><span>Order Changes And Cancellations</span><span>Review Policy</span></section>
+        </div>
+        <section class="account-footer-contact"><strong>Get in Touch</strong><span>Company: Bestvoy INC</span><span>Address: 7300 MILLER DR, FREDERICK CO 80504, US</span><span>Contact Us: support@bestvoy.com</span><span>Phone (US): +1 (508) 204-3308</span><p>Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p><div><input aria-label="Email address" placeholder="Please enter your email address"><button>Subscribe</button></div></section>
+      </div>
+      <div class="account-storefront-footer-bottom"><span>We Accept</span><div class="account-payment-chips" aria-label="Accepted payment methods"><img src="assets/images/payments/paypal.png" alt="PayPal"><img src="assets/images/payments/google-pay.svg" alt="Google Pay"><img src="assets/images/payments/apple-pay.svg" alt="Apple Pay"><img src="assets/images/payments/visa.svg" alt="Visa"><img src="assets/images/payments/mastercard.svg" alt="Mastercard"><img src="assets/images/payments/american-express.svg" alt="American Express"><img src="assets/images/payments/discover.png" alt="Discover"><img src="assets/images/payments/diners-club.svg" alt="Diners Club"><img src="assets/images/payments/jcb.png" alt="JCB"><img src="assets/images/payments/klarna.png" alt="Klarna"><img src="assets/images/payments/afterpay.png" alt="Afterpay"></div><small>© 2026 Bestvoy INC. All Rights Reserved.</small></div>
+    </footer>`;
+  }
+
+  function accountBreadcrumb(title) {
+    return `<nav class="account-storefront-breadcrumb" aria-label="Breadcrumb"><button data-go="index">Home</button><span>›</span><button data-go="account-orders">Account</button><span>›</span><strong>${h(title)}</strong></nav>`;
+  }
+
+  function accountNavigation(active) {
+    const links = [
+      ['account-orders', 'My orders', 'orders'],
+      ['account-collections', 'Collections', 'collections'],
+      ['account-address', 'Address Book', 'address']
+    ];
+    return `<nav class="account-storefront-side-nav" aria-label="Account navigation">${links.map(([view, label, icon]) => `<button class="account-storefront-side-link ${active === view ? 'is-active' : ''}" data-go="${view}"><i class="account-side-symbol account-icon account-icon--${icon}" aria-hidden="true"></i>${label}</button>`).join('')}</nav>`;
+  }
+
+  function accountMobileHeader(active) {
+    const links = [
+      ['account-orders', 'My orders'],
+      ['account-collections', 'Collections'],
+      ['account-address', 'Address Book']
+    ];
+    return `<section class="account-mobile-account-header">
+      <div class="account-mobile-profile">
+        <div class="account-mobile-avatar">AM</div>
+        <div class="account-mobile-profile-copy"><strong>Alex Morgan</strong><span>alex.morgan@email.com</span></div>
+        <div class="account-mobile-profile-actions">
+          <button data-account-action="password" aria-label="Edit password"><i class="account-icon account-icon--password" aria-hidden="true"></i></button>
+          <button data-account-action="signout" aria-label="Sign out"><i class="account-icon account-icon--signout" aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <nav class="account-mobile-account-menu" aria-label="Account menu">${links.map(([view, label]) => `<button class="${active === view ? 'is-active' : ''}" data-go="${view}">${label}</button>`).join('')}</nav>
+    </section>`;
+  }
+
+  function accountSidebar(active) {
+    return `<aside class="account-storefront-sidebar">
+      <div class="account-storefront-user"><div class="account-storefront-avatar">AM</div><strong>Alex Morgan</strong><span>alex.morgan@email.com</span><button data-account-action="password"><i class="account-icon account-icon--password" aria-hidden="true"></i><span>Edit password</span></button></div>
+      ${accountNavigation(active)}
+      <button class="account-storefront-signout" data-account-action="signout"><i class="account-side-symbol account-icon account-icon--signout" aria-hidden="true"></i>Sign Out</button>
+    </aside>`;
+  }
+
+  function accountShell(content, active = 'account-orders', title = 'My orders') {
+    return `<section class="account-storefront-root">
+      ${storefrontHeader()}
+      <main class="account-storefront-main">
+        ${accountBreadcrumb(title)}
+        <div class="account-storefront-layout">${accountSidebar(active)}<section class="account-storefront-content">${accountMobileHeader(active)}${content}</section></div>
+      </main>
+      ${storefrontFooter()}
+      ${state.toast ? `<div class="account-toast">${h(state.toast)}</div>` : ''}
+    </section>`;
+  }
+
+  function orderDetailShell(content) {
+    return `<section class="account-storefront-root">
+      ${storefrontHeader()}
+      <main class="account-detail-main">${accountBreadcrumb('Order details')}${content}</main>
+      ${storefrontFooter()}
+      ${state.toast ? `<div class="account-toast">${h(state.toast)}</div>` : ''}
+    </section>`;
+  }
+
+  function orderBadges(order) {
+    const badges = [];
+    if (orderHasBundle(order)) badges.push('<span class="order-kind-tag bundle">Bundle</span>');
+    if (orderHasSubscription(order)) badges.push('<span class="order-kind-tag subscription">Subscription</span>');
+    if (orderHasDiscount(order)) badges.push('<span class="order-kind-tag discount">Discount applied</span>');
+    return badges.length ? `<div class="order-kind-tags">${badges.join('')}</div>` : '';
+  }
+
+  function orderActions(order, compact) {
+    const id = h(order.id);
+    const classes = compact ? ' account-action-compact' : '';
+    const view = `<button class="account-button secondary${classes}" data-account-action="detail" data-id="${id}">View details</button>`;
+    const group = (actions) => `<div class="order-card-actions is-${actions.length}-actions">${actions.join('')}</div>`;
+    if (order.status === 'to_pay') return group([`<button class="account-button text${classes}" data-account-action="cancel-order" data-id="${id}">Cancel order</button>`, view, '<button class="account-button primary' + classes + '" data-go="checkout">Pay Now</button>']);
+    if (order.status === 'shipped') return group([view, `<button class="account-button secondary${classes}" data-account-action="track" data-id="${id}">Track package</button>`, `<button class="account-button primary${classes}" data-account-action="confirm" data-id="${id}">Confirm receipt</button>`]);
+    if (order.status === 'review') return group([view, `<button class="account-button primary${classes}" data-account-action="detail" data-id="${id}">Leave a review</button>`]);
+    return group([view]);
+  }
+
+  function orderListProduct(item) {
+    if (item.type === 'bundle') {
+      const children = (item.children || []).map((child) => `<div class="account-order-product account-order-bundle-child"><div class="account-order-product-image"><img src="${h(child.image)}" alt=""></div><div class="account-order-product-info"><div class="account-order-product-title"><span class="account-order-included ${child.gift ? 'is-gift' : ''}">${child.gift ? 'Free' : 'Included'}</span><strong>${h(child.title)}</strong></div>${child.variant ? `<span class="account-order-variant">${h(child.variant)}</span>` : ''}<div class="account-order-product-meta"><span>x${Number(child.qty || 1)}</span></div></div></div>`).join('');
+      return `<section class="account-order-bundle"><div class="account-order-bundle-head"><div><span class="account-order-bundle-tag">Bundle</span><strong>${h(item.title)}</strong></div><div>${priceBlock(item.price, item.compare)}</div></div>${children}</section>`;
+    }
+    return `<div class="account-order-product"><div class="account-order-product-image"><img src="${h(item.image)}" alt=""></div><div class="account-order-product-info"><strong>${h(item.title)}</strong>${item.variant ? `<span class="account-order-variant">${h(item.variant)}</span>` : ''}<div class="account-order-product-meta"><span>x${Number(item.qty || 1)}</span></div></div><div class="account-order-product-price">${priceBlock(item.price, item.compare)}</div></div>`;
+  }
+
+  function orderCard(order) {
+    const status = orderStatus(order);
+    const shipping = Number(order.shippingFee || 0);
+    const mobileTotal = `A total of <strong>${orderItemCount(order)}</strong> Items, actually paid <span>${money(order.total)}</span>${shipping > 0 ? `<em>(Including shipping ${money(shipping)})</em>` : ''}`;
+    return `<article class="account-live-order-card">
+      <button class="account-live-order-summary" data-account-action="detail" data-id="${h(order.id)}" aria-label="Open order ${h(order.id)}">
+        <div class="account-live-order-head"><span>Order date: ${h(order.createdAt)}</span><strong class="account-live-order-status ${status.tone}">${h(status.label)}</strong></div>
+        <div class="account-live-order-products">${order.items.map(orderListProduct).join('')}</div>
+      </button>
+      <div class="account-live-order-footer"><p class="account-live-order-total account-live-order-total--desktop"><span>Total</span><strong>${money(order.total)}</strong></p><p class="account-live-order-total account-live-order-total--mobile">${mobileTotal}</p>${orderActions(order, true)}</div>
+      ${state.trackOrderId === order.id && order.tracking ? trackingPanel(order) : ''}
+    </article>`;
+  }
+
   function ordersHtml() {
     state.lastAccountView = 'account-orders';
-    const shared = sidebarZones('account-orders');
-    const desktopZones = shared.pc.concat([
-      { x: 532, y: 325, w: 540, h: 46, action: 'detail', id: 'FOL20250827001', label: 'Open to pay order' },
-      { x: 942, y: 322, w: 130, h: 34, action: 'cancel-order', id: 'FOL20250827001', label: 'Cancel order' },
-      { x: 1078, y: 322, w: 130, h: 34, action: 'detail', id: 'FOL20250827001', label: 'View details' },
-      { x: 1216, y: 322, w: 130, h: 34, go: 'checkout', label: 'Pay now' },
-      { x: 1212, y: 630, w: 135, h: 38, action: 'detail', id: 'FOL20250827002', label: 'View to ship details' },
-      { x: 942, y: 872, w: 130, h: 34, action: 'detail', id: 'FOL20250827003', label: 'View shipped details' },
-      { x: 1078, y: 872, w: 130, h: 34, action: 'track', id: 'FOL20250827003', label: 'Track package' },
-      { x: 1216, y: 872, w: 130, h: 34, action: 'confirm', id: 'FOL20250827003', label: 'Confirm receipt' },
-      { x: 1078, y: 1096, w: 130, h: 34, action: 'detail', id: 'FOL20250827004', label: 'View review details' },
-      { x: 1216, y: 1096, w: 130, h: 34, action: 'detail', id: 'FOL20250827004', label: 'Leave a review' },
-      { x: 1216, y: 1788, w: 130, h: 34, action: 'detail', id: 'FOL20250827005', label: 'View done details' },
-      { x: 760, y: 2682, w: 390, h: 48, action: 'noop', label: 'Pagination' }
-    ]);
-    const mobileZones = shared.mobile.concat([
-      { x: 22, y: 650, w: 180, h: 54, action: 'cancel-order', id: 'FOL20250827001', label: 'Cancel order' },
-      { x: 222, y: 650, w: 190, h: 54, action: 'detail', id: 'FOL20250827001', label: 'View details' },
-      { x: 436, y: 650, w: 205, h: 54, go: 'checkout', label: 'Pay Now' },
-      { x: 30, y: 1175, w: 720, h: 64, action: 'detail', id: 'FOL20250827002', label: 'View to ship details' },
-      { x: 30, y: 1550, w: 190, h: 52, action: 'detail', id: 'FOL20250827003', label: 'View shipped details' },
-      { x: 305, y: 1550, w: 190, h: 52, action: 'track', id: 'FOL20250827003', label: 'Track package' },
-      { x: 515, y: 1550, w: 220, h: 52, action: 'confirm', id: 'FOL20250827003', label: 'Confirm receipt' },
-      { x: 30, y: 1982, w: 320, h: 56, action: 'detail', id: 'FOL20250827004', label: 'View review details' },
-      { x: 410, y: 1982, w: 330, h: 56, action: 'detail', id: 'FOL20250827004', label: 'Leave a review' },
-      { x: 30, y: 2932, w: 720, h: 64, action: 'detail', id: 'FOL20250827005', label: 'View done details' }
-    ]);
-    return shellFromAsset('account-orders-pc.png', 'account-orders-mobile.jpg', 1920, 2809, 786, 6712, desktopZones, mobileZones);
+    const filteredOrders = Object.values(orders).filter((order) => state.orderFilter === 'all' || order.status === state.orderFilter);
+    const filterTabs = ORDER_FILTERS.map(([value, label]) => `<button class="order-filter ${state.orderFilter === value ? 'is-active' : ''}" data-account-action="filter" data-filter="${value}">${label}</button>`).join('');
+    const empty = '<div class="account-order-empty"><strong>No orders yet.</strong><span>Orders matching this status will appear here.</span></div>';
+    return accountShell(`<section class="account-live-orders-section"><div class="order-filter-row" role="tablist" aria-label="Order status">${filterTabs}</div>
+      <div class="account-live-order-list">${filteredOrders.length ? filteredOrders.map(orderCard).join('') : empty}</div>
+      <div class="account-order-pagination" aria-label="Order pages"><span>‹</span><strong>1</strong><span>2</span><span>3</span><span>4</span><span>5</span><span>›</span></div>
+      ${orderDialogs()}`);
+  }
+
+  function collectionRemoveDialog() {
+    const item = collectionItems.find((candidate) => candidate.id === state.collectionRemoveId);
+    if (!item) return '';
+    return `<div class="account-dialog-backdrop" role="presentation"><section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="collection-remove-title"><button class="account-dialog-close" data-account-action="collection-remove-cancel" aria-label="Close">&times;</button><h2 id="collection-remove-title">Remove collection</h2><p>Remove <strong>${h(item.title)}</strong> from your collections?</p><div class="account-dialog-actions"><button class="account-button text" data-account-action="collection-remove-cancel">Cancel</button><button class="account-button primary" data-account-action="collection-remove-confirm">Remove</button></div></section></div>`;
+  }
+
+  function collectionCard(item) {
+    const discount = item.compare > item.price ? Math.round((1 - item.price / item.compare) * 100) : 0;
+    return `<article class="account-collection-card"><div class="account-collection-media"><img src="${h(item.image)}" alt="${h(item.title)}"></div><div class="account-collection-info"><h2>${h(item.title)}</h2><div class="account-collection-pricing"><strong>${money(item.price)}</strong>${item.compare > item.price ? `<s>${money(item.compare)}</s>` : ''}${discount ? `<span>${discount}% OFF</span>` : ''}</div><p>Free shipping</p></div><div class="account-collection-actions"><button class="account-collection-button primary" data-go="cart-page">View product</button><button class="account-collection-button text" data-account-action="collection-remove" data-id="${h(item.id)}">Remove</button></div></article>`;
   }
 
   function collectionsHtml() {
     state.lastAccountView = 'account-collections';
-    const shared = sidebarZones('account-collections');
-    const desktopZones = shared.pc.concat([
-      { x: 1645, y: 262, w: 220, h: 50, go: 'cart-page', label: 'View details' },
-      { x: 1690, y: 325, w: 120, h: 34, action: 'collection-remove', label: 'Remove collection item' },
-      { x: 1645, y: 438, w: 220, h: 50, go: 'cart-page', label: 'View details' },
-      { x: 1690, y: 502, w: 120, h: 34, action: 'collection-remove', label: 'Remove collection item' },
-      { x: 1645, y: 616, w: 220, h: 50, go: 'cart-page', label: 'View details' },
-      { x: 1690, y: 680, w: 120, h: 34, action: 'collection-remove', label: 'Remove collection item' },
-      { x: 1645, y: 793, w: 220, h: 50, go: 'cart-page', label: 'View details' },
-      { x: 1690, y: 858, w: 120, h: 34, action: 'collection-remove', label: 'Remove collection item' }
-    ]);
-    const mobileZones = shared.mobile.concat([
-      { x: 24, y: 360, w: 740, h: 420, go: 'cart-page', label: 'View details' },
-      { x: 24, y: 800, w: 740, h: 420, go: 'cart-page', label: 'View details' },
-      { x: 24, y: 1240, w: 740, h: 420, go: 'cart-page', label: 'View details' },
-      { x: 24, y: 1680, w: 740, h: 420, go: 'cart-page', label: 'View details' }
-    ]);
-    return shellFromAsset('account-collections-pc.png', 'account-collections-mobile.jpg', 1920, 1444, 786, 3902, desktopZones, mobileZones);
+    const content = collectionItems.length
+      ? `<div class="account-collection-list">${collectionItems.map(collectionCard).join('')}</div>`
+      : '<div class="account-account-empty"><strong>No collections yet.</strong><span>Save products to review them here later.</span></div>';
+    return accountShell(`<section class="account-view-section account-collections-section"><h1 class="account-view-title">Collections</h1>${content}${collectionRemoveDialog()}</section>`, 'account-collections', 'Collections');
+  }
+
+  function addressCard(item) {
+    return `<article class="account-address-card">${item.isDefault ? '<span class="account-address-default">Default</span>' : ''}<div class="account-address-info"><h2>${h(item.name)}</h2><p>${h(item.phone)}</p><p>${h(item.email)}</p><p class="account-address-lines">${item.lines.map(h).join('<br>')}</p></div><div class="account-address-actions"><button data-account-action="address-edit" data-id="${h(item.id)}">Edit</button><button data-account-action="address-delete" data-id="${h(item.id)}">Remove</button></div></article>`;
+  }
+
+  function addressDialogHtml() {
+    const dialog = state.addressDialog;
+    if (!dialog) return '';
+    const item = addressItems.find((candidate) => candidate.id === dialog.id);
+    if (dialog.mode === 'delete') {
+      if (!item) return '';
+      return `<div class="account-dialog-backdrop" role="presentation"><section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="address-delete-title"><button class="account-dialog-close" data-account-action="address-close" aria-label="Close">&times;</button><h2 id="address-delete-title">Delete address</h2><p>Delete the address for <strong>${h(item.name)}</strong> from your address book?</p><div class="account-dialog-actions"><button class="account-button text" data-account-action="address-close">Cancel</button><button class="account-button primary" data-account-action="address-delete-confirm">Confirm</button></div></section></div>`;
+    }
+    const values = item || { name: '', phone: '', email: '', lines: ['', '', ''], isDefault: false };
+    return `<div class="account-dialog-backdrop" role="presentation"><section class="account-dialog account-address-dialog" role="dialog" aria-modal="true" aria-labelledby="address-dialog-title"><button class="account-dialog-close" data-account-action="address-close" aria-label="Close">&times;</button><h2 id="address-dialog-title">${item ? 'Edit address' : 'Add new address'}</h2><div class="account-address-form"><label>Full name<input data-address-field="name" value="${h(values.name)}" autocomplete="name"></label><label>Phone<input data-address-field="phone" value="${h(values.phone)}" autocomplete="tel"></label><label class="account-address-form-wide">Email<input data-address-field="email" value="${h(values.email)}" autocomplete="email"></label><label class="account-address-form-wide">Address<input data-address-field="address1" value="${h(values.lines[0] || '')}" autocomplete="street-address"></label><label>City<input data-address-field="city" value="${h((values.lines[1] || '').split(',')[0] || '')}" autocomplete="address-level2"></label><label>State / ZIP code<input data-address-field="region" value="${h((values.lines[1] || '').split(',').slice(1).join(',').trim() || '')}" autocomplete="address-level1"></label><label class="account-address-form-wide">Country<input data-address-field="country" value="${h(values.lines[2] || 'United States')}" autocomplete="country-name"></label><label class="account-address-default-field"><input type="checkbox" data-address-field="default" ${values.isDefault ? 'checked' : ''}><span>Set as default address</span></label></div><div class="account-dialog-actions"><button class="account-button text" data-account-action="address-close">Cancel</button><button class="account-button primary" data-account-action="address-save">Save address</button></div></section></div>`;
   }
 
   function addressHtml() {
     state.lastAccountView = 'account-address';
-    const shared = sidebarZones('account-address');
-    const desktopZones = shared.pc.concat([
-      { x: 632, y: 252, w: 430, h: 170, action: 'address-add', label: 'Add new address' },
-      { x: 1855, y: 378, w: 42, h: 42, action: 'address-delete', label: 'Delete address' },
-      { x: 1800, y: 378, w: 42, h: 42, action: 'address-add', label: 'Edit address' }
-    ]);
-    const mobileZones = shared.mobile.concat([
-      { x: 32, y: 300, w: 720, h: 82, action: 'address-add', label: 'Add new address' },
-      { x: 30, y: 450, w: 720, h: 210, action: 'address-delete', label: 'Open address delete modal' }
-    ]);
-    return shellFromAsset('account-address-pc.png', 'account-address-mobile.jpg', 1920, 1313, 786, 3994, desktopZones, mobileZones);
+    return accountShell(`<section class="account-view-section account-address-section"><h1 class="account-view-title">Address Book</h1><div class="account-address-grid"><button class="account-address-add" data-account-action="address-add"><span aria-hidden="true">+</span><strong>Add new address</strong></button>${addressItems.map(addressCard).join('')}</div>${addressDialogHtml()}</section>`, 'account-address', 'Address Book');
   }
 
-  function vendorHtml() {
-    state.lastAccountView = 'account-vendor';
-    return `<section class="account-entry"><p class="entry-label">ACCOUNT</p><h1>Become a vendor</h1><p>This entry is shown in the account sidebar design. The vendor application flow is not part of this Neurix user-end prototype yet.</p><div class="entry-grid"><button class="entry-card" data-go="account-orders"><strong>Back to orders</strong><span>Return to the account center.</span></button></div></section>`;
+  function priceBlock(price, compare) {
+    const hasCompare = Number(compare || 0) > Number(price || 0);
+    return `<div class="account-inline-price">${hasCompare ? `<s>${money(compare)}</s>` : ''}<strong>${money(price)}</strong></div>`;
+  }
+
+  function priceAdjustment(label, amount, kind) {
+    if (!amount) return '';
+    return `<div class="account-detail-price-adjustment ${kind || ''}"><span><i class="account-detail-price-adjustment-icon account-icon account-icon--discount" aria-hidden="true"></i>${h(label)}</span><strong>-${money(amount)}</strong></div>`;
+  }
+
+  function deliveryIntervalLabel(subscription) {
+    const frequency = String(subscription && subscription.frequency ? subscription.frequency : '').trim();
+    if (!frequency) return 'Subscription';
+    return /^every\s+/i.test(frequency) ? `Delivery every ${frequency.replace(/^every\s+/i, '')}` : frequency;
+  }
+
+  function subscriptionPriceAdjustment(item) {
+    if (!item.subscription) return '';
+    const amount = Number(item.subscriptionDiscount || 0);
+    const label = deliveryIntervalLabel(item.subscription);
+    const summary = amount > 0 ? `${label} (-${money(amount)})` : label;
+    return `<div class="account-detail-price-adjustment subscription"><span><i class="account-detail-price-adjustment-icon account-icon account-icon--discount" aria-hidden="true"></i>${h(summary)}</span></div>`;
+  }
+
+  function formatVariant(value) {
+    return String(value || '').split(',').map((part) => part.trim()).filter(Boolean).join(' / ');
+  }
+
+  function itemPriceSummary(price, compare, adjustments) {
+    const rows = adjustments.filter(Boolean).join('');
+    return `<div class="account-detail-price-stack">${priceBlock(price, compare)}${rows ? `<div class="account-detail-price-adjustments">${rows}</div>` : ''}</div>`;
+  }
+
+  function itemReviewAction(order, item, itemIndex) {
+    if (item.reviewed) {
+      return '<span class="account-detail-review-status"><i class="account-icon account-icon--done" aria-hidden="true"></i>Reviewed</span>';
+    }
+    if (order.status !== 'review') return '';
+    return `<button class="account-detail-review-button" data-account-action="review-open" data-id="${h(order.id)}" data-item-index="${itemIndex}"><i class="account-icon account-icon--awaiting-review" aria-hidden="true"></i>Leave a review</button>`;
+  }
+
+  function productDetailItem(item, order, itemIndex) {
+    const variant = formatVariant(item.variant);
+    const reviewAction = itemReviewAction(order, item, itemIndex);
+    return `<article class="account-detail-goods-item">
+      <div class="account-detail-product-image"><img src="${h(item.image)}" alt=""></div>
+      <div class="account-detail-product-info"><div class="account-detail-product-copy"><strong>${h(item.title)}</strong>${variant ? `<span class="account-detail-product-variant">${h(variant)}</span>` : ''}<div class="account-detail-product-quantity">x${Number(item.qty || 1)}</div></div>
+        ${itemPriceSummary(item.price, item.compare, [subscriptionPriceAdjustment(item), priceAdjustment('Product discount', item.productDiscount, 'product')])}
+        ${reviewAction ? `<div class="account-detail-review-control">${reviewAction}</div>` : ''}
+      </div>
+    </article>`;
+  }
+
+  function bundleDetailItem(item, order, itemIndex) {
+    const childRows = (item.children || []).map((child) => {
+      const variant = formatVariant(child.variant);
+      return `<div class="account-detail-bundle-child">
+      <div class="account-detail-child-image"><img src="${h(child.image)}" alt=""></div>
+      <div><div class="account-detail-child-title"><span class="account-detail-included ${child.gift ? 'gift' : ''}">${child.gift ? 'Free' : 'Included'}</span><strong>${h(child.title)}</strong></div>${variant ? `<span class="account-detail-child-variant">${h(variant)}</span>` : ''}<span class="account-detail-child-quantity">x${Number(child.qty || 1)}</span></div>
+    </div>`;
+    }).join('');
+    const reviewAction = itemReviewAction(order, item, itemIndex);
+    return `<section class="account-detail-bundle-group">
+      <div class="account-detail-bundle-head"><div><span class="account-detail-bundle-label">Bundle</span><strong>${h(item.title)}</strong><span>x${Number(item.qty || 1)}</span></div></div>
+      ${itemPriceSummary(item.price, item.compare, [priceAdjustment('Bundle discount', item.bundleDiscount, 'bundle'), subscriptionPriceAdjustment(item)])}
+      <div class="account-detail-bundle-children">${childRows}</div>
+      ${reviewAction ? `<div class="account-detail-bundle-review-control">${reviewAction}</div>` : ''}
+    </section>`;
+  }
+
+  function trackingPanel(order) {
+    if (!order.tracking) return '';
+    return `<section class="account-tracking-panel"><div><span>Tracking</span><strong>${h(order.tracking.carrier)} ${h(order.tracking.number)}</strong></div><span class="tracking-stage">${h(order.tracking.stage)}</span></section>`;
+  }
+
+  function orderProgress(order) {
+    const status = orderStatus(order);
+    if (order.status === 'cancelled') return `<section class="account-detail-cancelled"><strong>Order cancelled</strong><span>This order was cancelled and will not be fulfilled.</span></section>`;
+    const steps = [['To pay', 'to-pay'], ['To ship', 'to-ship'], ['Shipped', 'shipped'], ['Awaiting Review', 'awaiting-review'], ['Done', 'done']];
+    return `<section class="account-detail-progress"><ol>${steps.map(([step, icon], index) => `<li class="${index <= status.progress ? 'is-complete' : ''} ${index === status.progress ? 'is-current' : ''}"><i class="account-detail-progress-icon account-icon account-icon--${icon}" aria-hidden="true"></i><strong>${step}</strong></li>`).join('')}</ol></section>`;
+  }
+
+  function orderTotals(order) {
+    const orderDiscounts = order.orderDiscounts || [];
+    const shippingDiscounts = order.shippingDiscounts || [];
+    const checkoutSubtotal = (order.items || []).reduce((total, item) => total + (Number(item.price || 0) * Number(item.qty || 1)), 0) || Number(order.subtotal || 0);
+    const discountLine = (discount) => `<div class="account-detail-summary-line account-detail-summary-subline"><span><i class="account-icon account-icon--discount" aria-hidden="true"></i>${h(discount.label)}</span><strong>-${money(discount.amount)}</strong></div>`;
+    const hasShippingDiscount = shippingDiscounts.length > 0;
+    const shippingDiscountTotal = shippingDiscounts.reduce((total, discount) => total + Number(discount.amount || 0), 0);
+    const shippingAmount = Number(order.shippingFee || shippingDiscountTotal || 0);
+    const shippingValue = hasShippingDiscount
+      ? `<strong class="account-detail-summary-shipping-value"><s>${money(shippingAmount)}</s><b>FREE</b></strong>`
+      : `<strong>${shippingAmount > 0 ? money(shippingAmount) : 'FREE'}</strong>`;
+    const totalSavings = Number(order.totalSavings || 0);
+
+    return `<section class="account-detail-summary">
+      <div class="account-detail-summary-line"><span>Subtotal (${orderItemCount(order)} Items)</span><strong>${money(checkoutSubtotal)}</strong></div>
+      ${orderDiscounts.length ? '<div class="account-detail-summary-line account-detail-summary-label"><span>Order Discount</span></div>' : ''}
+      ${orderDiscounts.map(discountLine).join('')}
+      <div class="account-detail-summary-line"><span>Shipping</span>${shippingValue}</div>
+      ${shippingDiscounts.map(discountLine).join('')}
+      <div class="account-detail-summary-line account-detail-summary-total"><span>Total</span><strong>${money(order.total)}</strong></div>
+      ${totalSavings > 0 ? `<div class="account-detail-summary-savings"><i class="account-icon account-icon--discount" aria-hidden="true"></i><span>TOTAL SAVINGS ${money(totalSavings)}</span></div>` : ''}
+    </section>`;
+  }
+
+  function orderInfoCards(order) {
+    const shippingAddress = h((order.shipping.lines || []).join(', '));
+    const delivery = order.tracking ? `<section class="account-detail-info-section"><h2>Delivery Information</h2><dl><div><dt>Express:</dt><dd>${h(order.tracking.carrier)}</dd></div><div><dt>Tracking number:</dt><dd>${h(order.tracking.number)} <button class="account-copy-button" data-account-action="track" data-id="${h(order.id)}">${state.trackOrderId === order.id ? 'Hide tracking' : 'Track package'}</button></dd></div></dl>${state.trackOrderId === order.id ? trackingPanel(order) : ''}</section>` : '';
+    return `<div class="account-detail-info-stack">${delivery}<section class="account-detail-info-section"><h2>Order Information</h2><dl><div><dt>Order number:</dt><dd>${h(order.id)}</dd></div><div><dt>Order status:</dt><dd>${h(orderStatus(order).label)}</dd></div><div><dt>Order date:</dt><dd>${h(order.createdAt)}</dd></div><div><dt>Payment Method:</dt><dd>${h(order.paymentMethod)}</dd></div><div><dt>Order total:</dt><dd class="account-detail-info-money">${money(order.total)}</dd></div></dl></section><section class="account-detail-info-section"><h2>Shipping Information</h2><dl><div><dt>Recipient:</dt><dd>${h(order.shipping.name)}</dd></div><div><dt>Email:</dt><dd>alex.morgan@email.com</dd></div><div><dt>Phone number:</dt><dd>${h(order.shipping.phone)}</dd></div><div><dt>Shipping address:</dt><dd>${shippingAddress}</dd></div></dl></section></div>`;
+  }
+
+  function orderTimeline(order) {
+    return `<section class="detail-timeline"><h2>Order updates</h2><ol>${order.timeline.slice().reverse().map((event) => `<li><span></span><div><strong>${h(event.label)}</strong><small>${h(event.time)}</small></div></li>`).join('')}</ol></section>`;
+  }
+
+  function detailActions(order) {
+    const id = h(order.id);
+    if (order.status === 'to_pay') return `<div class="account-detail-actions"><button class="account-button secondary" data-account-action="cancel-order" data-id="${id}">Cancel order</button><button class="account-button primary" data-go="checkout">Pay Now</button></div>`;
+    if (order.status === 'shipped') return `<div class="account-detail-actions"><button class="account-button secondary" data-account-action="track" data-id="${id}">Track package</button><button class="account-button primary" data-account-action="confirm" data-id="${id}">Confirm receipt</button></div>`;
+    if (order.status === 'done' || order.status === 'cancelled') return `<div class="account-detail-actions"><button class="account-button secondary" data-account-action="buy-again" data-id="${id}">Buy again</button></div>`;
+    return '';
+  }
+
+  function resetReviewForm() {
+    (state.reviewImages || []).forEach((image) => {
+      if (image && image.url && image.url.indexOf('blob:') === 0) URL.revokeObjectURL(image.url);
+    });
+    state.reviewRatings = { product: 0, service: 0, shipping: 0 };
+    state.reviewDescription = '';
+    state.reviewImages = [];
+  }
+
+  function reviewRatingRow(label, field) {
+    const score = Number(state.reviewRatings[field] || 0);
+    const ratingText = score ? `<span class="review-rating-text">${REVIEW_RATING_TEXTS[score - 1]}</span>` : '';
+    return `<div class="review-rating-row"><span class="review-rating-label">${label}</span><div class="review-stars" role="radiogroup" aria-label="${label}">${[1, 2, 3, 4, 5].map((value) => `<button type="button" class="${value <= score ? 'is-selected' : ''}" data-account-action="review-score" data-field="${field}" data-score="${value}" aria-label="${value} stars">&#9733;</button>`).join('')}</div>${ratingText}</div>`;
+  }
+
+  function reviewDialog(order) {
+    const imageItems = (state.reviewImages || []).map((image, index) => `<div class="review-image-item"><img src="${h(image.url)}" alt="Review upload ${index + 1}"><button type="button" data-account-action="review-remove-image" data-index="${index}" aria-label="Remove image">x</button></div>`).join('');
+    const remaining = Math.max(0, 6 - (state.reviewImages || []).length);
+    return `<div class="account-dialog-backdrop"><section class="account-dialog review-dialog" role="dialog" aria-modal="true" aria-labelledby="review-order-title"><header class="review-dialog-header"><h2 id="review-order-title">Leave a review</h2><button class="account-dialog-close" data-account-action="dialog-close" aria-label="Close">x</button></header><div class="review-dialog-body"><section class="review-section review-rating-section"><h3>Product rating</h3>${reviewRatingRow('Product quality', 'product')}${reviewRatingRow('Service attitude', 'service')}${reviewRatingRow('Shipping service', 'shipping')}</section><section class="review-section review-description-section"><h3>Product description</h3><textarea class="review-description" data-review-description maxlength="500" placeholder="Did the product meet your expectations? Share your thoughts to help others decide!">${h(state.reviewDescription)}</textarea><div class="review-description-meta"><span>Share your experience with this order.</span><span data-review-count>${state.reviewDescription.length} / 500</span></div></section><section class="review-section review-upload-section"><h3>Upload photos</h3><p class="review-upload-tip">Max 5MB per image. Supported formats: JPG, PNG, JPEG.</p><div class="review-upload-grid">${imageItems}${remaining > 0 ? '<button type="button" class="review-upload-button" data-account-action="review-upload" aria-label="Upload photos">+</button>' : ''}</div><input class="review-file-input" data-review-files type="file" accept="image/jpeg,image/jpg,image/png" multiple></section></div><div class="account-dialog-actions review-dialog-actions"><button class="account-button secondary" data-account-action="dialog-close">Cancel</button><button class="account-button primary" data-account-action="review-submit" data-id="${h(order.id)}" data-item-index="${state.reviewItemIndex}">Submit review</button></div></section></div>`;
+  }
+
+  function orderDialogs() {
+    const cancelOrder = state.cancelOrderId ? orders[state.cancelOrderId] : null;
+    const reviewOrder = state.reviewOrderId && state.reviewItemIndex >= 0 ? orders[state.reviewOrderId] : null;
+    if (cancelOrder) return `<div class="account-dialog-backdrop"><section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title"><button class="account-dialog-close" data-account-action="dialog-close" aria-label="Close">x</button><p class="account-eyebrow">CANCEL ORDER</p><h2 id="cancel-order-title">Cancel order #${h(cancelOrder.id)}?</h2><p>This action cannot be undone. Your payment will not be captured for this order.</p><div class="account-dialog-actions"><button class="account-button secondary" data-account-action="dialog-close">Keep order</button><button class="account-button danger" data-account-action="cancel-confirm" data-id="${h(cancelOrder.id)}">Cancel order</button></div></section></div>`;
+    if (reviewOrder) return reviewDialog(reviewOrder);
+    return '';
   }
 
   function detailHtml() {
-    const orderId = currentOrderId();
-    const status = orders[orderId]?.status || 'ship';
-    const asset = detailAsset[status] || detailAsset.ship;
-    const [desktop, mobile, dw, dh, mw, mh] = asset;
-    const desktopZones = [
-      { x: 330, y: 88, w: 170, h: 38, go: 'account-orders', label: 'Back to orders' },
-      { x: 580, y: 118, w: 760, h: 120, action: 'noop', label: 'Order progress' }
-    ];
-    const mobileZones = [
-      { x: 26, y: 75, w: 74, h: 74, go: 'account-orders', label: 'Back to orders' },
-      { x: 20, y: 150, w: 746, h: 190, action: 'noop', label: 'Order progress' }
-    ];
-    if (status === 'pay') {
-      desktopZones.push({ x: 1352, y: 1268, w: 154, h: 48, action: 'cancel-order', id: orderId, label: 'Cancel order' }, { x: 1522, y: 1268, w: 154, h: 48, go: 'checkout', label: 'Pay Now' });
-      mobileZones.push({ x: 24, y: 3000, w: 350, h: 70, action: 'cancel-order', id: orderId, label: 'Cancel order' }, { x: 400, y: 3000, w: 350, h: 70, go: 'checkout', label: 'Pay Now' });
-    }
-    if (status === 'shipped') {
-      desktopZones.push({ x: 1475, y: 1000, w: 165, h: 52, action: 'track', id: orderId, label: 'Track package' }, { x: 1660, y: 1000, w: 165, h: 52, action: 'confirm', id: orderId, label: 'Confirm receipt' });
-      mobileZones.push({ x: 28, y: 2620, w: 340, h: 70, action: 'track', id: orderId, label: 'Track package' }, { x: 398, y: 2620, w: 340, h: 70, action: 'confirm', id: orderId, label: 'Confirm receipt' });
-    }
-    if (status === 'review') {
-      desktopZones.push({ x: 1660, y: 866, w: 170, h: 54, action: 'review-modal', id: orderId, label: 'Leave a review' }, { x: 1475, y: 1000, w: 165, h: 52, action: 'track', id: orderId, label: 'Track package' }, { x: 1660, y: 1000, w: 165, h: 52, go: 'cart-page', label: 'Buy again' });
-      mobileZones.push({ x: 30, y: 2480, w: 720, h: 70, action: 'review-modal', id: orderId, label: 'Leave a review' });
-    }
-    if (status === 'done') {
-      desktopZones.push({ x: 650, y: 1160, w: 160, h: 46, go: 'cart-page', label: 'Buy again' });
-      mobileZones.push({ x: 30, y: 2440, w: 720, h: 70, go: 'cart-page', label: 'Buy again' });
-    }
-    const options = status === 'done' ? { desktopClass: 'tablet-design' } : {};
-    return shellFromAsset(desktop, mobile, dw, dh, mw, mh, desktopZones, mobileZones, options);
+    const order = orders[currentOrderId()] || orders.FOL20250827002;
+    const items = order.items.map((item, index) => item.type === 'bundle' ? bundleDetailItem(item, order, index) : productDetailItem(item, order, index)).join('');
+    return orderDetailShell(`<section class="account-live-order-detail">${orderProgress(order)}${orderInfoCards(order)}<section class="account-detail-goods-section"><h2>Items</h2><div class="account-detail-goods-list">${items}</div></section>${orderTotals(order)}${detailActions(order)}</section>${orderDialogs()}`);
   }
 
   function modalFrame(type) {
@@ -321,40 +813,184 @@
     if (view === 'account-orders') return ordersHtml();
     if (view === 'account-collections') return collectionsHtml();
     if (view === 'account-address') return addressHtml();
-    if (view === 'account-vendor') return vendorHtml();
     if (view === 'order-detail') return detailHtml();
     if (view === 'login' || view === 'register' || view === 'reset-password') return authHtml(view);
     if (view === 'account-password') return modalFrame('password');
     if (view === 'account-signout') return modalFrame('signout');
-    if (view === 'account-address-add') return modalFrame('addressAdd');
-    if (view === 'account-address-delete') return modalFrame('addressDelete');
+    if (view === 'account-address-add') { state.addressDialog = { mode: 'create', id: '' }; return addressHtml(); }
+    if (view === 'account-address-delete') { state.addressDialog = { mode: 'delete', id: addressItems[0] ? addressItems[0].id : '' }; return addressHtml(); }
     if (view === 'order-cancel') return modalFrame('cancelOrder');
-    if (view === 'order-review-modal') return modalFrame('review');
+    if (view === 'order-review-modal') {
+      const order = orders[currentOrderId()];
+      state.reviewOrderId = order ? order.id : '';
+      state.reviewItemIndex = order ? order.items.findIndex((item) => !item.reviewed) : -1;
+      return detailHtml();
+    }
     return null;
   }
 
   function handleAction(action, target) {
     const id = target.dataset.id;
     if (action === 'noop') return;
+    if (action === 'mobile-nav-toggle') { state.mobileNavOpen = !state.mobileNavOpen; if (window.render) window.render(); return; }
+    if (action === 'mobile-nav-close') { state.mobileNavOpen = false; if (window.render) window.render(); return; }
+    if (action === 'mobile-nav-go') { state.mobileNavOpen = false; setView(target.dataset.go || 'index'); return; }
+    if (action === 'filter') {
+      state.orderFilter = target.dataset.filter || 'all';
+      if (window.render) window.render();
+      return;
+    }
     if (action === 'detail') { setOrderDetail(id); return; }
     if (action === 'password') { setView('account-password'); return; }
     if (action === 'signout') { setView('account-signout'); return; }
     if (action === 'signout-confirm') { toast('Signed out'); setView('index'); return; }
     if (action === 'modal-close') { setView(state.lastAccountView || 'account-orders'); return; }
     if (action === 'save-password') { toast('Password updated'); setView(state.lastAccountView || 'account-orders'); return; }
-    if (action === 'address-add') { state.lastAccountView = 'account-address'; setView('account-address-add'); return; }
-    if (action === 'address-delete') { state.lastAccountView = 'account-address'; setView('account-address-delete'); return; }
-    if (action === 'address-close') { setView('account-address'); return; }
-    if (action === 'address-save') { toast('Address saved'); setView('account-address'); return; }
-    if (action === 'address-delete-confirm') { toast('Address deleted'); setView('account-address'); return; }
-    if (action === 'collection-remove') { toast('Removed from collections'); return; }
-    if (action === 'cancel-order') { setView('order-cancel', { id: id || currentOrderId() }); return; }
-    if (action === 'cancel-confirm') { toast('Order cancelled'); setOrderDetail(id || 'FOL20250827001'); return; }
+    if (action === 'address-add') { state.addressDialog = { mode: 'create', id: '' }; if (window.render) window.render(); return; }
+    if (action === 'address-edit') { state.addressDialog = { mode: 'edit', id }; if (window.render) window.render(); return; }
+    if (action === 'address-delete') { state.addressDialog = { mode: 'delete', id }; if (window.render) window.render(); return; }
+    if (action === 'address-close') { state.addressDialog = null; if (window.render) window.render(); return; }
+    if (action === 'address-save') {
+      const dialog = state.addressDialog;
+      const read = (name) => String(document.querySelector(`[data-address-field="${name}"]`)?.value || '').trim();
+      const defaultField = document.querySelector('[data-address-field="default"]');
+      const isDefault = defaultField instanceof HTMLInputElement && defaultField.checked;
+      const name = read('name');
+      if (!name) { toast('Enter a full name'); return; }
+      const city = read('city');
+      const region = read('region');
+      const next = { id: dialog && dialog.id ? dialog.id : `ADDR-${Date.now()}`, name, phone: read('phone'), email: read('email'), lines: [read('address1'), [city, region].filter(Boolean).join(', '), read('country') || 'United States'].filter(Boolean), isDefault };
+      if (isDefault) addressItems.forEach((candidate) => { candidate.isDefault = false; });
+      const index = addressItems.findIndex((candidate) => candidate.id === next.id);
+      if (index >= 0) addressItems.splice(index, 1, next);
+      else addressItems.push(next);
+      state.addressDialog = null;
+      toast(index >= 0 ? 'Address updated' : 'Address added');
+      return;
+    }
+    if (action === 'address-delete-confirm') {
+      const dialog = state.addressDialog;
+      const index = addressItems.findIndex((candidate) => candidate.id === (dialog && dialog.id));
+      if (index >= 0) {
+        const wasDefault = addressItems[index].isDefault;
+        addressItems.splice(index, 1);
+        if (wasDefault && addressItems[0]) addressItems[0].isDefault = true;
+      }
+      state.addressDialog = null;
+      toast('Address deleted');
+      return;
+    }
+    if (action === 'collection-remove') { state.collectionRemoveId = id; if (window.render) window.render(); return; }
+    if (action === 'collection-remove-cancel') { state.collectionRemoveId = ''; if (window.render) window.render(); return; }
+    if (action === 'collection-remove-confirm') {
+      const index = collectionItems.findIndex((candidate) => candidate.id === state.collectionRemoveId);
+      if (index >= 0) collectionItems.splice(index, 1);
+      state.collectionRemoveId = '';
+      toast('Removed from collections');
+      return;
+    }
+    if (action === 'cancel-order') {
+      state.cancelOrderId = id || currentOrderId();
+      state.reviewOrderId = '';
+      state.reviewItemIndex = -1;
+      if (window.render) window.render();
+      return;
+    }
+    if (action === 'dialog-close') {
+      state.cancelOrderId = '';
+      state.reviewOrderId = '';
+      state.reviewItemIndex = -1;
+      resetReviewForm();
+      if (window.render) window.render();
+      return;
+    }
+    if (action === 'cancel-confirm') {
+      const order = orders[id || state.cancelOrderId];
+      if (order) {
+        order.status = 'cancelled';
+        order.paymentStatus = order.paidAmount ? 'Refund pending' : 'Cancelled';
+        order.timeline.push({ label: 'Order cancelled', time: 'Just now' });
+      }
+      state.cancelOrderId = '';
+      toast('Order cancelled');
+      return;
+    }
     if (action === 'modal-close-detail') { setOrderDetail(id || currentOrderId()); return; }
-    if (action === 'review-modal') { setView('order-review-modal', { id: id || currentOrderId() }); return; }
-    if (action === 'review-submit') { toast('Review submitted'); setOrderDetail(id || 'FOL20250827004'); return; }
-    if (action === 'track') { toast('Tracking package'); return; }
-    if (action === 'confirm') { toast('Receipt confirmed'); setOrderDetail('FOL20250827005'); return; }
+    if (action === 'review-open' || action === 'review-modal') {
+      const order = orders[id || currentOrderId()];
+      const requestedIndex = Number(target.dataset.itemIndex);
+      const itemIndex = action === 'review-open' && Number.isInteger(requestedIndex)
+        ? requestedIndex
+        : order ? order.items.findIndex((item) => !item.reviewed) : -1;
+      if (!order || itemIndex < 0 || !order.items[itemIndex] || order.items[itemIndex].reviewed) return;
+      state.reviewOrderId = order.id;
+      state.reviewItemIndex = itemIndex;
+      state.cancelOrderId = '';
+      resetReviewForm();
+      if (window.render) window.render();
+      return;
+    }
+    if (action === 'review-score') {
+      const field = target.dataset.field;
+      if (!['product', 'service', 'shipping'].includes(field)) return;
+      state.reviewRatings[field] = Math.max(1, Math.min(5, Number(target.dataset.score || 5)));
+      if (window.render) window.render();
+      return;
+    }
+    if (action === 'review-upload') {
+      document.querySelector('.review-file-input')?.click();
+      return;
+    }
+    if (action === 'review-remove-image') {
+      const index = Number(target.dataset.index);
+      const image = state.reviewImages[index];
+      if (image && image.url && image.url.indexOf('blob:') === 0) URL.revokeObjectURL(image.url);
+      state.reviewImages = state.reviewImages.filter((_, imageIndex) => imageIndex !== index);
+      if (window.render) window.render();
+      return;
+    }
+    if (action === 'review-submit') {
+      const order = orders[id || state.reviewOrderId];
+      const itemIndex = Number(target.dataset.itemIndex);
+      const ratings = state.reviewRatings;
+      if (!ratings.product || !ratings.service || !ratings.shipping || !state.reviewDescription.trim()) {
+        toast('Complete all ratings and add a review');
+        return;
+      }
+      if (order && Number.isInteger(itemIndex) && order.items[itemIndex]) {
+        const item = order.items[itemIndex];
+        item.reviewed = true;
+        order.timeline.push({ label: `Review submitted for ${item.title}`, time: 'Just now' });
+        if (order.items.every((candidate) => candidate.reviewed)) {
+          order.status = 'done';
+          order.timeline.push({ label: 'All item reviews submitted', time: 'Just now' });
+        }
+      }
+      state.reviewOrderId = '';
+      state.reviewItemIndex = -1;
+      resetReviewForm();
+      toast('Review submitted');
+      return;
+    }
+    if (action === 'track') {
+      const order = orders[id || currentOrderId()];
+      if (!order || !order.tracking) { toast('Tracking is not available yet'); return; }
+      state.trackOrderId = state.trackOrderId === order.id ? '' : order.id;
+      if (window.render) window.render();
+      return;
+    }
+    if (action === 'confirm') {
+      const order = orders[id || currentOrderId()];
+      if (order) {
+        order.status = 'review';
+        if (order.tracking) order.tracking.stage = 'Delivered just now';
+        order.timeline.push({ label: 'Delivery received', time: 'Just now' });
+      }
+      state.trackOrderId = '';
+      toast('Receipt confirmed');
+      return;
+    }
+    if (action === 'buy-again') { setView('cart-page'); return; }
     if (action === 'auth-complete') { toast('Signed in'); setView('account-orders'); return; }
     if (action === 'reset-next') { state.resetStep = Math.min(4, Number(state.resetStep || 1) + 1); if (window.render) window.render(); }
   }
@@ -366,6 +1002,39 @@
     event.stopPropagation();
     handleAction(target.dataset.accountAction, target);
   }, true);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !state.mobileNavOpen) return;
+    state.mobileNavOpen = false;
+    if (window.render) window.render();
+  });
+
+  document.addEventListener('input', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLTextAreaElement) || !target.matches('[data-review-description]')) return;
+    state.reviewDescription = target.value.slice(0, 500);
+    const count = target.closest('.review-description-section')?.querySelector('[data-review-count]');
+    if (count) count.textContent = `${state.reviewDescription.length} / 500`;
+  });
+
+  document.addEventListener('change', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || !target.matches('[data-review-files]')) return;
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const remaining = Math.max(0, 6 - state.reviewImages.length);
+    const files = Array.from(target.files || []).slice(0, remaining);
+    let rejected = false;
+    files.forEach((file) => {
+      if (!allowedTypes.includes(file.type.toLowerCase()) || file.size > 5 * 1024 * 1024) {
+        rejected = true;
+        return;
+      }
+      state.reviewImages.push({ url: URL.createObjectURL(file) });
+    });
+    target.value = '';
+    if (rejected) toast('Use JPG or PNG images up to 5MB');
+    if (window.render) window.render();
+  });
 
   window.AccountPrototype = { renderView };
 })();

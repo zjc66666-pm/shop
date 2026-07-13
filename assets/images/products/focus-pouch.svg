@@ -1,0 +1,10 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="160" rx="12" fill="#F4F3EF"/>
+  <path d="M47 30H113L121 135H39L47 30Z" fill="#E3E9E1"/>
+  <path d="M47 30H113L110 47H50L47 30Z" fill="#416B57"/>
+  <rect x="51" y="58" width="58" height="48" rx="4" fill="#416B57"/>
+  <path d="M68 85C68 77.8203 73.8203 72 81 72C88.1797 72 94 77.8203 94 85C94 92.1797 88.1797 98 81 98C73.8203 98 68 92.1797 68 85Z" fill="#E7C86A"/>
+  <path d="M81 76V94" stroke="#416B57" stroke-width="3" stroke-linecap="round"/>
+  <path d="M72 85H90" stroke="#416B57" stroke-width="3" stroke-linecap="round"/>
+  <text x="80" y="55" fill="#416B57" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">ENERGY</text>
+</svg>
